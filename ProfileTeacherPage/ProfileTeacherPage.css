@@ -268,6 +268,7 @@ body {
 }
 .main-wrapper__section-given-tasks-table{
     display: flex;
+    width: -webkit-fill-available;
     flex-direction: column;
     gap: 30px;
     margin: 10px 125px 10px 125px;
