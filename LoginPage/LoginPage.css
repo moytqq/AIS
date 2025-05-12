@@ -28,9 +28,9 @@ body, html{
     align-items: center;
     justify-content: center;
 }
-main {
+/* main {
     flex: 1 1 auto;
-}
+} */
 
 input::-ms-clear {
     display: none;

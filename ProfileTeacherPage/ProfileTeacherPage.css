@@ -22,9 +22,9 @@ body {
     -webkit-text-size-adjust: 100%;
 }
 
-main {
-    flex: 1 1 auto;
-}
+    /* main {
+        flex: 1 1 auto;
+    } */
 
 body, html {
     height: 100%;
@@ -115,14 +115,17 @@ body {
 .profile-tooltip__img-bell{
     width: 30px;
 }
-img{
+/* img{
     border-radius: 50%;
     overflow: hidden;
     width: auto;
-}
+} */
 .profile-tooltip__img-user{
     height: 40px;
     margin: auto;
+    border-radius: 50%;
+    overflow: hidden;
+    width: auto;
 }
 .profile-tooltip__menu{
     margin: auto;
@@ -184,6 +187,7 @@ img{
 .profile-tooltip__dropdown:hover .profile-tooltip__dropdown-content {
     display: flex;
     flex-direction: column;
+    justify-content: end;
     gap: 15px;
     opacity: 1;
 }
@@ -219,6 +223,9 @@ img{
 }
 .userinfo__img-user{
     height: 160px;
+    width: auto;
+    border-radius: 50%;
+    overflow: hidden;
     width: auto;
 }
 .userinfo__username{
@@ -274,6 +281,8 @@ img{
     height: 350px;
     font-weight: 350;
     font-size: 24px;
+    scrollbar-width:thin;
+    scrollbar-color: #7B70EE #D9D9D9;
 }
 .given-tasks-table__table {
 	width: 100%;
