@@ -32,7 +32,25 @@
   </header>
   <main class="main-wrapper">
     <section class="main-wrapper__section-userinfo-tasklist">
-      <div class="userinfo">
+      <div class="tabs">
+        <div class="tab">
+            <input type="radio" id="tab1" name="tab-group" checked>
+            <label for="tab1" class="tab-title">Вкладка 1</label> 
+            <section class="tab-content">
+                <span></span>
+            </section>   
+        </div>
+        <div class="tab">
+            <input type="radio" id="tab2" name="tab-group">
+            <label for="tab2" class="tab-title">Вкладка 2</label> 
+            <section class="tab-content">Два</section>
+        </div>
+      </div>
+      
+      
+      
+      
+        <!-- <div class="userinfo">
         <img class="userinfo__img-user" src="/img/Lya_kakoi.webp"  alt>
         <span class="userinfo__username">Иванов И. И.</span>
         <span class="userinfo__user-email">ivanov@example.com</span>
@@ -47,7 +65,7 @@
             <button class="tasklist_task-button">Задание</button>
             <button class="tasklist_task-button">Задание</button>
         </div>
-      </div>
+      </div> -->
     </section>
     <section class="main-wrapper__section-given-tasks-table">
         <span class="given-tasks-table__header">Выданные задания:</span>

@@ -151,7 +151,7 @@ body {
 .profile-tooltip__button-chevron{
     width: 40px;
     height: 40px;
-    background-image: url("img/Chevron_Down.svg");
+    background-image: url("/img/Chevron_Down.svg");
     background-size: cover
 }
 .profile-tooltip__dropdown-content{
@@ -174,11 +174,11 @@ body {
     box-shadow: none;
 }
 .a1{
-    background-image: url(img/button_settings.svg);
+    background-image: url(/img/button_settings.svg);
     background-size:contain ;
 }
 .a2{
-    background-image: url(img/button_logout.svg);
+    background-image: url(/img/button_logout.svg);
     background-size:contain ;
 }
 .profile-tooltip__dropdown-content a:hover {
@@ -200,7 +200,50 @@ body {
     margin: 12px auto 15px;
     padding-bottom: 45px;
     border-radius: 0px 0px 20px 20px;
+    display: flex;
+    align-items: start;
+    flex-direction: column;
 
+}
+
+.tabs {
+    position: relative;
+    margin: 10px 135px 10px 135px;
+}
+.tab, .tab-title {
+    display: inline-block;
+}
+.tab input[type="radio"] { display: none; }
+.tab-title {
+    background: #F3F3F3;
+    padding: 5px 10px;
+    border: 1px solid #666;
+    border-bottom: none;
+    width: 110px;
+}
+.tab:first-child .tab-title{
+    border-radius: 10px 0 0 0 ;
+}
+.tab:last-child .tab-title{
+    border-radius: 0 10px 0 0 ;
+}
+.tab-content {
+    position: absolute;
+    border: 1px solid #7F7C7C; 
+    padding: 10px; 
+    left: 0;
+    border-radius: 0 10px 10px 10px;
+    width: auto;
+    display: none;
+}
+.tab :checked + .tab-title {
+    position: relative;
+    background: #fff;
+    top: 1px;
+    z-index: 1;
+}
+.tab :checked ~ .tab-content {
+    display: block;
 }
 .main-wrapper__section-userinfo-tasklist{
     padding-top: 25px;
@@ -268,6 +311,7 @@ body {
 }
 .main-wrapper__section-given-tasks-table{
     display: flex;
+    width: -webkit-fill-available;
     flex-direction: column;
     gap: 30px;
     margin: 10px 125px 10px 125px;
