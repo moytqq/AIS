@@ -288,7 +288,6 @@ body {
 .given-tasks-table__table {
 	width: 100%;
 	border: none;
-	margin-bottom: 20px;
 	border-collapse: separate;
 }
 .given-tasks-table__table thead th {
