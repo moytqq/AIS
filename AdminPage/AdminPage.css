@@ -290,7 +290,7 @@ input{
 .tabs__input-group input{
     width: 200px;
 }
-.login-form__submit-button{
+.admin-form__submit-button{
     width: 150px;
     height: 35px;
     background-color: #212529;
@@ -381,6 +381,7 @@ input{
 }
 .section-admin-list__checkbox{
     width: 28px;
+    height: 35px;
 }
 .section-admin-list__group-name{
     height: 20px;
