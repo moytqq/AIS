@@ -151,7 +151,7 @@ body {
 .profile-tooltip__button-chevron{
     width: 40px;
     height: 40px;
-    background-image: url("img/Chevron_Down.svg");
+    background-image: url("/img/Chevron_Down.svg");
     background-size: cover
 }
 .profile-tooltip__dropdown-content{
@@ -174,11 +174,11 @@ body {
     box-shadow: none;
 }
 .a1{
-    background-image: url(img/button_settings.svg);
+    background-image: url(/img/button_settings.svg);
     background-size:contain ;
 }
 .a2{
-    background-image: url(img/button_logout.svg);
+    background-image: url(/img/button_logout.svg);
     background-size:contain ;
 }
 .profile-tooltip__dropdown-content a:hover {
