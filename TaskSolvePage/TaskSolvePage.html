@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./TaskSolvePage.css">
+    <title>Profile-Teacher</title>
+</head>
+<body>
+  <header class="header-wrapper">
+    <div class="profile-logo">
+      <img class="profile-logo__sys-img" src="/img/University_logo.webp" alt="">
+      <span class="profile-logo__sys-name">Система проверки заданий по СИИ</span>
+    </div>
+    <div class="profile-tooltip">
+      <img class="profile-tooltip__img-bell" src="/img/bell.svg" alt="">
+      <img class="profile-tooltip__img-user" src="/img/Lya_kakoi.webp" alt="">
+      <div class="profile-tooltip__menu">
+        <div>
+          <a class="profile-tooltip_to-profile-href" href="/ProfileTeacherPage/ProfileTeacherPage.html"> </a>
+          <span class="profile-tooltip_username">Иванов И. И.</span><br>
+          <span class="profile-tooltip_user-role">Преподаватель</span>
+        </div>
+        <div class="profile-tooltip__dropdown">
+          <button class="profile-tooltip__button-chevron"></button>
+          <div class="profile-tooltip__dropdown-content">
+            <a class="profile-tooltip__dropdown-button a1" href="/AdminPage/AdminPage.html"></a>
+            <a class="profile-tooltip__dropdown-button a2" href="/LoginPage/LoginPage.html"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="main-wrapper">
+    <section class="main-wrapper__section-tasksolve">
+      <div class="section-tasksolve__taskinfo">
+        <span class="section-tasksolve__task-name">Название задания</span>
+        <span class="section-tasksolve__task-description">Описание задачи описание задачи описание задачи</span>
+      </div>
+      <form class="section-tasksolve__task-display">
+        <div class="section-tasksolve__task-graphics">
+          <img class="section-tasksolve_filler-img" src="/img/alpha-beta.webp" alt="">
+        </div>
+        <div class="section-tasksolve__task-info">
+          <div class="section-tasksolve__task-info-details">              
+              <span class="tabs__input-span">Информаци по решению:</span>
+          </div>
+          <button class="tasksolve-form__submit-button">Готово</button>
+      </div>
+    </form>
+    </section>
+  </main>
+</body>
+</html>
