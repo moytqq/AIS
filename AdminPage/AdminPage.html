@@ -23,135 +23,106 @@
         <div class="profile-tooltip__dropdown">
           <button class="profile-tooltip__button-chevron"></button>
           <div class="profile-tooltip__dropdown-content">
-            <a class="profile-tooltip__dropdown-button a1" href="#"></a>
-            <a class="profile-tooltip__dropdown-button a2" href="#"></a>
+            <a class="profile-tooltip__dropdown-button a1" href="/AdminPage/AdminPage.html"></a>
+            <a class="profile-tooltip__dropdown-button a2" href="/LoginPage/LoginPage.html"></a>
           </div>
         </div>
       </div>
     </div>
   </header>
   <main class="main-wrapper">
-    <section class="main-wrapper__section-userinfo-tasklist">
-      <div class="tabs">
-        <div class="tab">
-            <input type="radio" id="tab1" name="tab-group" checked>
-            <label for="tab1" class="tab-title">Вкладка 1</label> 
-            <section class="tab-content">
-                <span></span>
-            </section>   
+    <section class="main-wrapper__section-admin-edit">
+      <form class="admin__form-edit" action="">
+        <div class="admin__tabs">
+          <div class="tabs__tab">
+              <input type="radio" id="student-tab" name="tab-group" checked>
+              <label for="student-tab" class="tabs__title">Студент</label> 
+              <section class="tabs__content">
+                <div class="tabs__input tabs__input-group">              
+                  <span class="tabs__input-span">Группа:</span>
+                  <input type="text">
+                  <button class="profile-tooltip__button-chevron"></button>
+                </div>
+                <div class="tabs__input">
+                  <span class="tabs__input-span">ФИО:</span>
+                  <input type="text">
+                </div>
+                <button class="login-form__submit-button">Сохранить</button>
+              </section>
+          </div>
+          <div class="tabs__tab">
+              <input type="radio" id="group-tab" name="tab-group">
+              <label for="group-tab" class="tabs__title">Группа</label> 
+              <section class="tabs__content">
+                <div class="tabs__input tabs__input-group">              
+                  <span class="tabs__input-span">Группа:</span>
+                  <input type="text">
+                  <button class="profile-tooltip__button-chevron"></button>
+                </div>
+                <button class="login-form__submit-button">Сохранить</button>
+              </section>
+          </div>
         </div>
-        <div class="tab">
-            <input type="radio" id="tab2" name="tab-group">
-            <label for="tab2" class="tab-title">Вкладка 2</label> 
-            <section class="tab-content">Два</section>
-        </div>
-      </div>
-      
-      
-      
-      
-        <!-- <div class="userinfo">
-        <img class="userinfo__img-user" src="/img/Lya_kakoi.webp"  alt>
-        <span class="userinfo__username">Иванов И. И.</span>
-        <span class="userinfo__user-email">ivanov@example.com</span>
-        <span class="userinfo__user-role">Преподаватель</span>
-      </div>
-      <div class="tasklist">
-        <span class="tasklist__header">Задания:</span>
-        <div class="tasklist__content">
-            <button class="tasklist_task-button">Понедельник начинается в субботу</button>
-            <button class="tasklist_task-button">α & β отсечение</button>
-            <button class="tasklist_task-button">Задание</button>
-            <button class="tasklist_task-button">Задание</button>
-            <button class="tasklist_task-button">Задание</button>
-        </div>
-      </div> -->
+      </form>
     </section>
-    <section class="main-wrapper__section-given-tasks-table">
-        <span class="given-tasks-table__header">Выданные задания:</span>
-        <div class="given-tasks-table__content">
-            <table class="given-tasks-table__table">
+    <section class="main-wrapper__section-admin-list">
+        <div class="section-admin-list__content">
+            <table class="section-admin-list__table">
                 <thead>
                     <tr>
-                        <th>Задание</th>
+                        <th> 
+                          <input class="section-admin-list__checkbox" type="checkbox" name="" id="">
+                          <span class="section-admin-list__group-name">20-ИВТ1-по-б</span>
+                          <button class="profile-tooltip__button-chevron"></button>
+                        </th>
                         <th>Студент</th>
-                        <th>Группа</th>
-                        <th>Дата</th>
-                        <th>Статус</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                     <tr>
-                        <td>α & β отсечение</td>
+                        <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
-                        <td>20-ИВТ1-по-б</td>
-                        <td>22.05.2024</td>
-                        <td>Выдано</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
                     </tr>
                 </tbody>

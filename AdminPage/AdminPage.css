@@ -151,6 +151,7 @@ body {
 .profile-tooltip__button-chevron{
     width: 40px;
     height: 40px;
+    margin-bottom: 10px;
     background-image: url("/img/Chevron_Down.svg");
     background-size: cover
 }
@@ -195,7 +196,7 @@ body {
     background-color: #FFFAFA;
     color: #000000;
     width: 90vw;
-    height: auto;
+    height: 90vh;
     max-width: var(--wrapper-width, 1440px);
     margin: 12px auto 15px;
     padding-bottom: 45px;
@@ -205,29 +206,43 @@ body {
     flex-direction: column;
 
 }
-
-.tabs {
-    position: relative;
-    margin: 10px 135px 10px 135px;
+.main-wrapper__section-admin-edit{
+    margin: 0px 135px 10px 135px;
+    padding-top: 25px;
+    width: -webkit-fill-available;;
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    height: 160px;
+    margin-bottom: 30px;
 }
-.tab, .tab-title {
+.admin__form-edit{
+    width: 100%;
+    height: auto;
+}
+.admin__tabs {
+    width: 100%;
+    height: auto;
+    position: relative;
+}
+.tabs__tab, .tabs__title {
     display: inline-block;
 }
-.tab input[type="radio"] { display: none; }
-.tab-title {
+.tabs__tab input[type="radio"] { display: none; }
+.tabs__title {
     background: #F3F3F3;
     padding: 5px 10px;
     border: 1px solid #666;
     border-bottom: none;
     width: 110px;
 }
-.tab:first-child .tab-title{
+.tabs__tab:first-child .tabs__title{
     border-radius: 10px 0 0 0 ;
 }
-.tab:last-child .tab-title{
+.tabs__tab:last-child .tabs__title{
     border-radius: 0 10px 0 0 ;
 }
-.tab-content {
+.tabs__content {
     position: absolute;
     border: 1px solid #7F7C7C; 
     padding: 10px; 
@@ -236,21 +251,52 @@ body {
     width: auto;
     display: none;
 }
-.tab :checked + .tab-title {
+.tabs__tab :checked + .tabs__title {
     position: relative;
     background: #fff;
     top: 1px;
     z-index: 1;
 }
-.tab :checked ~ .tab-content {
-    display: block;
-}
-.main-wrapper__section-userinfo-tasklist{
-    padding-top: 25px;
+.tabs__tab :checked ~ .tabs__content {
+    width: 100%;
+    height: 125px;
     display: flex;
+    align-items: start;
+    justify-content: start;
     flex-direction: row;
-    gap: 25px;
-    height: 290px;
+    gap: 45px;
+}
+.tabs__input{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-direction: row;
+    font-size: 24px;
+    height: 40px;
+}
+input{
+    width: 450px;
+    height: 35px;
+    border-radius: 20px;
+    background-color: #DFDFDF;
+    font-size: 24px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.tabs__input-span{
+    height: min-content;
+}
+.tabs__input-group input{
+    width: 200px;
+}
+.login-form__submit-button{
+    width: 150px;
+    height: 35px;
+    background-color: #212529;
+    font-size: 20px;
+    color: #FFFFFF;
+    border-radius: 20px;
 }
 .userinfo{
     width:fit-content;
@@ -309,7 +355,7 @@ body {
     overflow: hidden;
     overflow-wrap: break-word;
 }
-.main-wrapper__section-given-tasks-table{
+.main-wrapper__section-admin-list{
     display: flex;
     width: -webkit-fill-available;
     flex-direction: column;
@@ -320,7 +366,7 @@ body {
 .given-tasks-table__header{
     font-size: 32px;
 }
-.given-tasks-table__content{
+.section-admin-list__content{
     overflow: auto;
     height: 350px;
     font-weight: 350;
@@ -328,13 +374,18 @@ body {
     scrollbar-width:thin;
     scrollbar-color: #7B70EE #D9D9D9;
 }
-.given-tasks-table__table {
+.section-admin-list__table {
 	width: 100%;
 	border: none;
-	margin-bottom: 20px;
 	border-collapse: separate;
 }
-.given-tasks-table__table thead th {
+.section-admin-list__checkbox{
+    width: 28px;
+}
+.section-admin-list__group-name{
+    height: 20px;
+}
+.section-admin-list__table thead th {
 	font-weight: bold;
 	text-align: left;
 	border: none;
@@ -343,35 +394,38 @@ body {
 	font-size: 24px;
 	border-top: 1px solid #ddd;
 }
-.given-tasks-table__table tr th:first-child, .given-tasks-table__table tr td:first-child {
+.section-admin-list__table tr th:first-child, .section-admin-list__table tr td:first-child {
 	border-left: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.given-tasks-table__table tr th:last-child, .given-tasks-table__table tr td:last-child {
+.section-admin-list__table tr th:last-child, .section-admin-list__table tr td:last-child {
 	border-right: 1px solid #ddd;
 }
-.given-tasks-table__table thead tr th:first-child {
+.section-admin-list__table thead tr th:first-child {
 	border-radius: 10px 0 0 0;
 }
-.given-tasks-table__table thead tr th:last-child {
+.section-admin-list__table thead tr th:last-child {
 	border-radius: 0 10px 0 0;
 }
-.given-tasks-table__table tbody td {
+.section-admin-list__table tbody td {
 	text-align: left;
 	border: none;
 	padding: 10px 15px;
 	font-size: 24px;
 	vertical-align: top;
 }
-/* .given-tasks-table__table tbody tr:nth-child(even) {
+/* .section-admin-list__table tbody tr:nth-child(even) {
 	background: #F8F8F8;
 } */
-.given-tasks-table__table tbody tr:last-child td{
+.section-admin-list__table tbody tr:last-child td{
 	border-bottom: 1px solid #ddd;
 }
-.given-tasks-table__table tbody tr:last-child td:first-child {
+.section-admin-list__table tbody tr:last-child td:first-child {
 	border-radius: 0 0 0 10px;
 }
-.given-tasks-table__table tbody tr:last-child td:last-child {
+.section-admin-list__table tbody tr:last-child td:last-child {
 	border-radius: 0 0 10px 0;
 }
 thead{
