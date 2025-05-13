@@ -133,6 +133,11 @@ body {
     display: flex;
     gap: 15px;
 }
+.profile-tooltip_to-profile-href{
+    position: absolute;
+    width: 100px;
+    height: 50px;
+}
 .profile-tooltip_username{
     display: inline-block;
     width: max-content;
