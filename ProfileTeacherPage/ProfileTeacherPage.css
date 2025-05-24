@@ -1,81 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Special+Gothic+Expanded+One&display=swap");
-* {
-    padding: 0;
-    margin: 0;
-    border: 0;
-}
 
-*, *:before, *:after {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-aside, nav, footer, header, section {
-    display: block;
-}
-
-body {
-    line-height: 1;
-    -ms-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
-}
-
-    /* main {
-        flex: 1 1 auto;
-    } */
-
-body, html {
-    height: 100%;
-}
-
-input::-ms-clear {
-    display: none;
-}
-
-button {
-    background-color: transparent;
-    cursor: pointer;
-}
-
-button::-moz-focus-inner {
-    padding: 0;
-    border: 0;
-}
-
-a, a:visited {
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: none;
-}
-
-ul li {
-    list-style: none;
-}
-
-img {
-    vertical-align: top;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    font-weight: inherit;
-    font-size: inherit;
-}
-body {
-    font-family: "Rubik", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 450;
-    font-style: normal;
-    background: radial-gradient( #EFEFEF 35%, #4A99A3);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
 .header-wrapper{
     display: flex;
     max-width: var(--wrapper-width, 1440px);
@@ -178,11 +101,11 @@ body {
     display: block;
     box-shadow: none;
 }
-.a1{
+.button_settings{
     background-image: url(/img/button_settings.svg);
     background-size:contain ;
 }
-.a2{
+.button_logout{
     background-image: url(/img/button_logout.svg);
     background-size:contain ;
 }
