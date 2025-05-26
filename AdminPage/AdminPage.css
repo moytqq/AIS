@@ -106,6 +106,13 @@ input{
 .tabs__input-password input{
     width: 200px;
 }
+.form-register__button-generate{
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+    background-image: url("/img/button_generate.png");
+    background-size: cover
+}
 .admin-form__submit-button{
     width: 150px;
     height: 35px;

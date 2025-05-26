@@ -40,7 +40,7 @@
           <div class="tabs__tab">
               <input type="radio" id="student-tab" name="tab-group" checked>
               <label for="student-tab" class="tabs__title">Студент</label> 
-              <section class="tabs__content">
+              <section id="id_form_register_user" class="tabs__content">
                 <div class="tabs__input-sections">
                   <div class="tabs__input tabs__input-group">              
                     <span class="tabs__input-span">Группа:</span>
@@ -49,18 +49,18 @@
                   </div>
                   <div class="tabs__input">
                     <span class="tabs__input-span">ФИО:</span>
-                    <input id="id_fullName" type="text">
+                    <input id="id_userFullName" type="text">
                   </div>
                 </div>
                 <div class="tabs__input-sections">
                   <div class="tabs__input tabs__input-login">              
                     <span class="tabs__input-span">Логин:</span>
-                    <input id="id_userLogin" type="text">
-                    <button class="profile-tooltip__button-chevron"></button>
+                    <input id="id_userName" type="text">
                   </div>
                   <div class="tabs__input tabs__input-password">
                     <span class="tabs__input-span">Пароль:</span>
                     <input id="id_userPassword" type="text">
+                    <button id="id_button_generate_login_password" class="form-register__button-generate"></button>
                   </div>
                 </div>
               </section>
@@ -79,6 +79,7 @@
         </div>
       </form>
       <button 
+        id="id_button_admin_save"
         class="admin-form__submit-button"
         type="submit"
         form="form_register"
@@ -86,7 +87,7 @@
     </section>
     <section class="main-wrapper__section-admin-list">
         <div class="section-admin-list__content">
-            <table class="section-admin-list__table">
+            <table id="admin-users-table" class="section-admin-list__table">
                 <thead>
                     <tr>
                         <th> 
@@ -99,7 +100,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <!-- <tr>
                         <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
@@ -143,12 +144,13 @@
                         <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
                         <td><img src="/img/button_edit.svg" alt=""> <img src="/img/button_delete.svg" alt=""></td>
-                    </tr>
+                    </tr> -->
                 </tbody>
             </table>
         </div>
     </section>
   </main>
-  <script src="./AdminPage.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+  <script src="/AdminPage/AdminPage.js"></script>
 </body>
 </html>
