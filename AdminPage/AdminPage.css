@@ -16,15 +16,14 @@
     margin: 0px 135px 10px 135px;
     padding-top: 25px;
     width: -webkit-fill-available;;
-    display: flex;
-    flex-direction: row;
-    gap: 25px;
-    height: 160px;
-    margin-bottom: 30px;
+    /* display: flex;
+    flex-direction: column;
+    gap: 25px; */
+    height: auto;
 }
 .admin__form-edit{
     width: 100%;
-    height: auto;
+    height: 160px;
 }
 .admin__tabs {
     width: 100%;
@@ -48,6 +47,11 @@
 .tabs__tab:last-child .tabs__title{
     border-radius: 0 10px 0 0 ;
 }
+.tabs__input-sections{
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
 .tabs__content {
     position: absolute;
     border: 1px solid #7F7C7C; 
@@ -68,9 +72,9 @@
     height: 125px;
     display: flex;
     align-items: start;
-    justify-content: start;
-    flex-direction: row;
-    gap: 45px;
+    justify-content: space-evenly;
+    flex-direction: column;
+    gap: 10px;
 }
 .tabs__input{
     display: flex;
@@ -94,6 +98,12 @@ input{
     height: min-content;
 }
 .tabs__input-group input{
+    width: 200px;
+}
+.tabs__input-login input{
+    width: 200px;
+}
+.tabs__input-password input{
     width: 200px;
 }
 .admin-form__submit-button{
