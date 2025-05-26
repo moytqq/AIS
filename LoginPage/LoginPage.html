@@ -13,18 +13,18 @@
     <img class="login-logo__sys-img" src="img/University_logo.webp" alt="">
     <span class="login-logo__sys-name">Система проверки заданий по СИИ</span>
   </div>
-  <form action="" target="_blank" class="login-form">
+  <form id="form_login" class="login-form">
     <div class="login-form__input">
       <span>Логин:</span>
-      <input type="text">
+      <input id="id_userLogin" type="text">
     </div>
     <div class="login-form__input">
       <span>Пароль:</span>
-      <input type="text" name="" id="">
+      <input id="id_userPassword" type="text">
     </div>
-    <button class="login-form__passwordreset-button">Забыли пароль?</button>
-    <button class="login-form__submit-button" onclick="document.location='/ProfileTeacherPage/ProfileTeacherPage.html'">Вход</button>
+    <button class="login-form__submit-button" type="submit" >Вход</button>
   </form>
 </main>
+<script src="/LoginPage/LoginPage.js"></script>
 </body>
 </html>

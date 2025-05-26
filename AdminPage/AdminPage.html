@@ -35,22 +35,34 @@
   </header>
   <main class="main-wrapper">
     <section class="main-wrapper__section-admin-edit">
-      <form class="admin__form-edit" action="">
+      <form id="form_register" class="admin__form-edit">
         <div class="admin__tabs">
           <div class="tabs__tab">
               <input type="radio" id="student-tab" name="tab-group" checked>
               <label for="student-tab" class="tabs__title">Студент</label> 
               <section class="tabs__content">
-                <div class="tabs__input tabs__input-group">              
-                  <span class="tabs__input-span">Группа:</span>
-                  <input type="text">
-                  <button class="profile-tooltip__button-chevron"></button>
+                <div class="tabs__input-sections">
+                  <div class="tabs__input tabs__input-group">              
+                    <span class="tabs__input-span">Группа:</span>
+                    <input id="id_groupName-of-user" type="text">
+                    <button class="profile-tooltip__button-chevron"></button>
+                  </div>
+                  <div class="tabs__input">
+                    <span class="tabs__input-span">ФИО:</span>
+                    <input id="id_fullName" type="text">
+                  </div>
                 </div>
-                <div class="tabs__input">
-                  <span class="tabs__input-span">ФИО:</span>
-                  <input type="text">
+                <div class="tabs__input-sections">
+                  <div class="tabs__input tabs__input-login">              
+                    <span class="tabs__input-span">Логин:</span>
+                    <input id="id_userLogin" type="text">
+                    <button class="profile-tooltip__button-chevron"></button>
+                  </div>
+                  <div class="tabs__input tabs__input-password">
+                    <span class="tabs__input-span">Пароль:</span>
+                    <input id="id_userPassword" type="text">
+                  </div>
                 </div>
-                <button class="admin-form__submit-button">Сохранить</button>
               </section>
           </div>
           <div class="tabs__tab">
@@ -59,14 +71,18 @@
               <section class="tabs__content">
                 <div class="tabs__input tabs__input-group">              
                   <span class="tabs__input-span">Группа:</span>
-                  <input type="text">
+                  <input id="id_groupName" type="text">
                   <button class="profile-tooltip__button-chevron"></button>
                 </div>
-                <button class="admin-form__submit-button">Сохранить</button>
               </section>
           </div>
         </div>
       </form>
+      <button 
+        class="admin-form__submit-button"
+        type="submit"
+        form="form_register"
+      >Сохранить</button>
     </section>
     <section class="main-wrapper__section-admin-list">
         <div class="section-admin-list__content">
@@ -133,5 +149,6 @@
         </div>
     </section>
   </main>
+  <script src="./AdminPage.js"></script>
 </body>
 </html>
