@@ -3,7 +3,7 @@ function splitFullName(FullName, separator) {
     return (SplittedFullName);
 }
 function joinFullName(data) {
-    data.forEach(row =>{
+    data.forEach(row => {
         row.name = [row.secondName, row.name, row.patronymic].join(' ');
     })
 }
@@ -96,7 +96,16 @@ function generatePassword(length = 8) {
 
     return password;
 }
+async function checkIfUserExists() {
 
+    const data = await fetchDBData()
+
+    for (const user of data) {
+        if (user.id == document.getElementById('id_userId').value) {
+            return true;
+        }
+    }
+}
 document.getElementById('id_button_generate_login_password').addEventListener('click', e => {
     e.preventDefault();
 
@@ -105,35 +114,46 @@ document.getElementById('id_button_generate_login_password').addEventListener('c
 
 })
 
-document.getElementById('id_button_admin_save').addEventListener('click', e => {
+document.getElementById('id_button_admin_save').addEventListener('click', async e => {
     e.preventDefault();
 
     const from_register_user = document.getElementById('id_form_register_user')
     const from_register_user_styles = window.getComputedStyle(from_register_user);
 
     if (from_register_user_styles.display != 'none') {
-        
         const SplittedFullName = splitFullName(document.getElementById('id_userFullName').value, " ")
 
         const data = {
+            userId: document.getElementById('id_userId').value,
             userName: document.getElementById('id_userName').value,
             password: document.getElementById('id_userPassword').value,
             name: SplittedFullName[1],
             secondName: SplittedFullName[0],
             patronymic: SplittedFullName[2],
         }
-        sendUserForm(data);
+
+
+        if (await checkIfUserExists()) {
+            // data.userId = document.getElementById('id_userId').value;
+            // data.groupId = document.getElementById('id_groupName-of-user').value;
+            document.getElementById('id_userId').value = '';
+            putUser(data);
+        }
+        else {
+            addUser(data);
+        }
+
     }
-    else{
+    else {
         const data = {
             groupName: document.getElementById('id_groupName').value
         }
-        sendGroupForm(data);
+        addGroup(data);
     }
-    
+
 })
 
-async function sendUserForm(data) {
+async function addUser(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const res = await fetch(`${apiHost}/Users/Register`, {
         method: 'POST',
@@ -151,7 +171,7 @@ async function sendUserForm(data) {
     // const result = await res.json();
 }
 
-async function sendGroupForm(data) {
+async function addGroup(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const res = await fetch(`${apiHost}/Users/Groups?groupName=` + data.groupName, {
         method: 'POST',
@@ -167,7 +187,7 @@ async function sendGroupForm(data) {
     // const result = await res.json();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetchDBData();
 });
 
@@ -182,6 +202,7 @@ async function fetchDBData() {
             },
         });
         const data = await response.json();
+        console.log("fetch")
         populateTable(data);
         return data;
     } catch (error) {
@@ -195,9 +216,9 @@ function populateTable(data) {
 
     data.forEach(row => {
         if (row.name != ' admin ') {
-            
+
             const tr = document.createElement('tr');
-        
+
             tr.innerHTML = `
                 <td>${row.group}</td>
                 <td>${row.name}</td>
@@ -206,49 +227,76 @@ function populateTable(data) {
                     <button id="id_admin-list__button-delete" class="admin-list__button-delete" data-id="${row.id}"></button>
                 </td>
             `;
-            
+
             tableBody.appendChild(tr);
-    }
+        }
     });
 
     document.querySelectorAll('.admin-list__button-delete').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            if (confirm('Вы уверены, что хотите удалить эту запись?')){
+        btn.addEventListener('click', async function () {
+            if (confirm('Вы уверены, что хотите удалить эту запись?')) {
                 await deleteRecord(this.getAttribute('data-id'));
                 fetchDBData();
             }
-            
+
         });
     });
     document.querySelectorAll('.admin-list__button-edit').forEach(btn => {
-        btn.addEventListener('click', function() {
-            EditRecord(this.getAttribute('data-id'));
+        btn.addEventListener('click', function () {
+            editRecord(this.getAttribute('data-id'));
         });
     });
 };
 
 async function deleteRecord(id) {
     try {
+        if (typeof id === String) {
+            arrOfIds = [id];
+        }
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users?userid=` + id, {
+        const response = await fetch(`${apiHost}/Users?userId=` + id, {
             method: 'DELETE',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authtoken}`,
-            body: JSON.stringify(id)
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`,
+            }
         });
         alert('Запись успешно удалена');
-        
+        fetchDBData();
     } catch (error) {
         console.error('Ошибка:', error);
         alert('Не удалось удалить запись');
     }
 }
-async function EditRecord(id) {
+async function editRecord(id) {
     const data = await fetchDBData();
     data.forEach(user => {
         if (user.id === id) {
             document.getElementById('id_groupName-of-user').value = `${user.group}`
             document.getElementById('id_userFullName').value = user.name
+            document.getElementById('id_userId').value = user.id
         }
     });
+}
+
+async function putUser(data) {
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const response = await fetch(`${apiHost}/Users/${data.userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (response.status == 200) {
+            alert('Запись успешно изменена');
+        }
+        else{alert('oops')}
+        fetchDBData();
+    } catch (error) {
+
+    }
+
 }
