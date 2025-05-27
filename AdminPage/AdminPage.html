@@ -96,10 +96,14 @@
                           <button class="profile-tooltip__button-chevron"></button>
                         </th>
                         <th>Студент</th>
-                        <th></th>
+                        <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
+                  <td> 
+                    <button id="id_admin-list__button-edit" class="admin-list__button-edit" data-id="${row.id}"></button> 
+                    <button id="id_admin-list__button-delete" class="admin-list__button-delete" data-id="${row.id}"></button>
+                  </td>
                     <!-- <tr>
                         <td> <input class="section-admin-list__checkbox" type="checkbox" name="" id=""> 20-ИВТ1-по-б</td>
                         <td>Иванов И. И.</td>
@@ -152,5 +156,6 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
   <script src="/AdminPage/AdminPage.js"></script>
+  <script src="/scripts/main.js" ></script>
 </body>
 </html>

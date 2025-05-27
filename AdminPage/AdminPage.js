@@ -4,7 +4,6 @@ function splitFullName(FullName, separator) {
 }
 function joinFullName(data) {
     data.forEach(row =>{
-        // const test = [row.secondName, row.name, row.patronymic].join(' ')
         row.name = [row.secondName, row.name, row.patronymic].join(' ');
     })
 }
@@ -136,7 +135,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', e => {
 
 async function sendUserForm(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const res = await fetch('https://localhost:7169/api/Users/Register', {
+    const res = await fetch(`${apiHost}/Users/Register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -147,13 +146,14 @@ async function sendUserForm(data) {
 
     if (res.status === 200) {
         alert('Пользователь добавлен')
+        fetchDBData();
     }
     // const result = await res.json();
 }
 
 async function sendGroupForm(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const res = await fetch('https://localhost:7169/api/Users/Groups?groupName=' + data.groupName, {
+    const res = await fetch(`${apiHost}/Users/Groups?groupName=` + data.groupName, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch('https://localhost:7169/api/Users', {
+        const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -183,6 +183,7 @@ async function fetchDBData() {
         });
         const data = await response.json();
         populateTable(data);
+        return data;
     } catch (error) {
         console.error('Ошибка при получении данных:', error);
     }
@@ -200,9 +201,54 @@ function populateTable(data) {
             tr.innerHTML = `
                 <td>${row.group}</td>
                 <td>${row.name}</td>
+                <td>
+                    <button id="id_admin-list__button-edit" class="admin-list__button-edit" data-id="${row.id}"></button> 
+                    <button id="id_admin-list__button-delete" class="admin-list__button-delete" data-id="${row.id}"></button>
+                </td>
             `;
             
             tableBody.appendChild(tr);
     }
+    });
+
+    document.querySelectorAll('.admin-list__button-delete').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            if (confirm('Вы уверены, что хотите удалить эту запись?')){
+                await deleteRecord(this.getAttribute('data-id'));
+                fetchDBData();
+            }
+            
+        });
+    });
+    document.querySelectorAll('.admin-list__button-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            EditRecord(this.getAttribute('data-id'));
+        });
+    });
+};
+
+async function deleteRecord(id) {
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const response = await fetch(`${apiHost}/Users?userid=` + id, {
+            method: 'DELETE',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authtoken}`,
+            body: JSON.stringify(id)
+        });
+        alert('Запись успешно удалена');
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Не удалось удалить запись');
+    }
+}
+async function EditRecord(id) {
+    const data = await fetchDBData();
+    data.forEach(user => {
+        if (user.id === id) {
+            document.getElementById('id_groupName-of-user').value = `${user.group}`
+            document.getElementById('id_userFullName').value = user.name
+        }
     });
 }

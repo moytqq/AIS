@@ -106,12 +106,21 @@ input{
 .tabs__input-password input{
     width: 200px;
 }
-.form-register__button-generate{
-    width: 40px;
-    height: 40px;
-    margin-bottom: 10px;
+.form-register__button-generate, .admin-list__button-edit, .admin-list__button-delete{
+    width: 32px;
+    height: 32px;
     background-image: url("/img/button_generate.png");
     background-size: cover
+}
+.admin-list__button-edit{
+    width: 35px;
+    height: 35px;
+    margin-left: 10px;
+    margin-right: 10px;
+    background-image: url("/img/edit-svgrepo-com.svg");
+}
+.admin-list__button-delete{
+    background-image: url("/img//delete-1487-svgrepo-com.svg");
 }
 .admin-form__submit-button{
     width: 150px;
@@ -220,9 +229,11 @@ input{
 }
 .section-admin-list__table tr th:first-child, .section-admin-list__table tr td:first-child {
 	border-left: 1px solid #ddd;
-    display: flex;
+    /* display: flex; */
+    padding: 10px 15px;
     align-items: center;
-    gap: 10px;
+    font-size: 24px;
+    vertical-align: middle;
 }
 .section-admin-list__table tr th:last-child, .section-admin-list__table tr td:last-child {
 	border-right: 1px solid #ddd;
@@ -238,7 +249,7 @@ input{
 	border: none;
 	padding: 10px 15px;
 	font-size: 24px;
-	vertical-align: top;
+	vertical-align: middle;
 }
 /* .section-admin-list__table tbody tr:nth-child(even) {
 	background: #F8F8F8;
