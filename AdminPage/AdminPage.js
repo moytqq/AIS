@@ -130,6 +130,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
             name: SplittedFullName[1],
             secondName: SplittedFullName[0],
             patronymic: SplittedFullName[2],
+            groupId: document.getElementById('id_groupName-of-user').value
         }
 
 
