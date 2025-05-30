@@ -145,6 +145,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
             putUser(data);
         }
         else {
+            document.getElementById('id_groupId').value = '';
             addUser(data);
         }
 
@@ -185,9 +186,22 @@ async function addUser(data) {
     // const result = await res.json();
 }
 
-async function addGroup(data) {
+async function addGroup(groupName) {
+    
+    if (!groupName || !groupName.trim()) {
+        alert('Введите название группы');
+        return false;
+    }
+
+    // Проверяем, существует ли уже такая группа
+    const groups = await fetchGroups();
+    if (groups.some(group => group.name === groupName)) {
+        alert('Группа с таким названием уже существует');
+        return false;
+    }
+
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const res = await fetch(`${apiHost}/Users/Groups?groupName=` + data.groupName, {
+    const res = await fetch(`${apiHost}/Users/Groups?groupName=` + groupName, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -195,15 +209,57 @@ async function addGroup(data) {
         },
     });
 
-    if (res.status === 200) {
-        alert('Группа добавлена')
+    if (res.ok) {
+        document.getElementById("id_groupName-of-user").value = ''
+        alert('Группа успешно добавлена');
+        await Promise.all([fetchDBData(), setupGroupDropdowns()]);
+        return true;
+    } else {
+        const errorData = await res.json();
+        alert(errorData.message || 'Ошибка при добавлении группы');
+        return false;
     }
-    // const result = await res.json();
 }
 
+async function deleteGroup(groupId) {
+    if (!groupId) {
+        alert('Группа не выбрана');
+        return false;
+    }
+
+    if (!confirm('Вы уверены, что хотите удалить эту группу?')) {
+        return false;
+    }
+
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const response = await fetch(`${apiHost}/Users/Groups?id=${groupId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+
+        if (response.ok) {
+            alert('Группа успешно удалена');
+            await Promise.all([fetchDBData(), setupGroupDropdowns()]);
+            return true;
+        } else {
+            alert('Ошибка при удалении группы');
+            return false;
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при удалении группы');
+        return false;
+    }
+}
 document.addEventListener('DOMContentLoaded', function () {
     fetchDBData();
-    setupGroupDropdowns();
+    setupGroupDropdowns().then(() => {
+        setupGroupButtons();
+    });
 });
 
 async function fetchDBData() {
@@ -339,80 +395,82 @@ async function fetchGroups() {
     }
 }
 
+// Новая версия setupGroupDropdowns
 async function setupGroupDropdowns() {
     const groups = await fetchGroups();
     
-    // Обработчики для кнопок в форме студента
-    document.querySelector('.tabs__input-group .profile-tooltip__button-chevron').addEventListener('click', function(e) {
-        e.preventDefault();
-        toggleGroupDropdown(this, groups, 'id_groupName-of-user');
+    // Удаляем старые обработчики
+    document.querySelectorAll('.profile-tooltip__button-chevron').forEach(btn => {
+        btn.replaceWith(btn.cloneNode(true));
     });
-    
-    // Обработчики для кнопок в форме группы
-    document.querySelector('#group-tab .tabs__input-group .profile-tooltip__button-chevron').addEventListener('click', function(e) {
-        e.preventDefault();
-        toggleGroupDropdown(this, groups, 'id_groupName');
+
+    // Вешаем новые обработчики с делегированием событий
+    document.body.addEventListener('click', function(e) {
+        // Для кнопки в форме студента
+        if (e.target.closest('#student-tab ~ .tabs__content .profile-tooltip__button-chevron')) {
+            e.preventDefault();
+            toggleGroupDropdown(e.target, groups, 'id_groupName-of-user', 'id_groupId');
+        }
+        
+        // Для кнопки в форме группы
+        if (e.target.closest('#group-tab ~ .tabs__content .profile-tooltip__button-chevron')) {
+            e.preventDefault();
+            toggleGroupDropdown(e.target, groups, 'id_groupName');
+        }
     });
 }
 
-function toggleGroupDropdown(button, groups, inputId) {
-    // Проверяем, есть ли уже выпадающий список
+// Улучшенная версия toggleGroupDropdown
+function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
+    
+    // Проверяем, есть ли уже открытый дропдаун для этой кнопки
     const existingDropdown = button.nextElementSibling;
+
+    // Если дропдаун существует и это именно наш дропдаун - закрываем его
     if (existingDropdown && existingDropdown.classList.contains('group-dropdown')) {
         existingDropdown.remove();
         return;
-    }
+        }
+    // Закрываем все открытые дропдауны
+    document.querySelectorAll('.group-dropdown').forEach(d => d.remove());
     
-    // Создаем новый выпадающий список
+    // Создаем новый дропдаун
     const dropdown = document.createElement('div');
     dropdown.className = 'group-dropdown';
-    dropdown.style.position = 'absolute';
-    dropdown.style.backgroundColor = '#fff';
-    dropdown.style.border = '1px solid #ddd';
-    dropdown.style.borderRadius = '5px';
-    dropdown.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    dropdown.style.zIndex = '1000';
-    dropdown.style.maxHeight = '200px';
-    dropdown.style.overflowY = 'auto';
-    dropdown.style.minWidth = '300px'; // Увеличиваем минимальную ширину
     
-    // Добавляем группы в список
+    // Добавляем его сразу после кнопки в DOM
+    button.parentNode.insertBefore(dropdown, button.nextSibling);
+
+    // Заполняем группами
     groups.forEach(group => {
         const item = document.createElement('div');
+        item.className = 'group-dropdown-item';
         item.textContent = group.name;
-        item.style.padding = '8px 12px';
-        item.style.cursor = 'pointer';
-        item.style.whiteSpace = 'normal'; // Разрешаем перенос текста
-        item.style.wordBreak = 'break-word'; // Переносим длинные слова
         
         item.addEventListener('click', () => {
-            document.getElementById(inputId).value = group.name;
-            if (group.id) {
-                document.getElementById("id_groupId").value = group.id;
+            document.getElementById(inputNameId).value = group.name;
+            if (inputGroupId && document.getElementById(inputGroupId)) {
+                document.getElementById(inputGroupId).value = group.id;
             }
             dropdown.remove();
         });
         
-        item.addEventListener('mouseover', () => {
-            item.style.backgroundColor = '#f5f5f5';
-        });
-        
-        item.addEventListener('mouseout', () => {
-            item.style.backgroundColor = '#fff';
-        });
-        
         dropdown.appendChild(item);
     });
-    
-    // Позиционируем выпадающий список
+
+    // Позиционируем
     const rect = button.getBoundingClientRect();
-    dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-    dropdown.style.left = `${rect.left + window.scrollX}px`;
+    const parentRect = button.parentNode.getBoundingClientRect();
     
-    // Добавляем в DOM
-    document.body.appendChild(dropdown);
+    Object.assign(dropdown.style, {
+        position: 'absolute',
+        top: `${rect.bottom - parentRect.top}px`,
+        left: `${rect.left - parentRect.left}px`,
+        zIndex: 1000,
+        width: `${rect.width}px`
+    });
     
-    // Закрываем при клике вне списка
+    // Обработчик закрытия при клике вне дропдауна
     const closeHandler = (e) => {
         if (!dropdown.contains(e.target) && e.target !== button) {
             dropdown.remove();
@@ -420,6 +478,47 @@ function toggleGroupDropdown(button, groups, inputId) {
         }
     };
     
-    document.addEventListener('click', closeHandler);
+    setTimeout(() => document.addEventListener('click', closeHandler), 0);
 }
 
+function setupGroupButtons() {
+    // Обработчик для кнопки добавления группы
+    document.querySelector('.profile-tooltip__button-add-group')?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const groupNameInput = document.getElementById('id_groupName-of-user');
+        const groupName = groupNameInput.value.trim();
+        
+        if (!groupName) {
+            alert('Введите название группы в поле ввода');
+            return;
+        }
+
+        const success = await addGroup(groupName);
+        if (success) {
+            // Обновляем список групп
+            await setupGroupDropdowns();
+            // Не очищаем поле ввода, чтобы пользователь видел добавленную группу
+            document.getElementById('id_groupId').value = ''; // Очищаем ID
+        }
+    });
+    // Обработчик для кнопки удаления группы
+    document.querySelector('.profile-tooltip__button-delete-group')?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const groupId = document.getElementById('id_groupId').value;
+        const groupName = document.getElementById('id_groupName-of-user').value;
+        
+        if (!groupId || !groupName) {
+            alert('Сначала выберите группу из списка');
+            return;
+        }
+
+        const success = await deleteGroup(groupId);
+        if (success) {
+            // Обновляем список групп
+            await setupGroupDropdowns();
+            // Очищаем поле ввода
+            document.getElementById('id_groupName-of-user').value = '';
+            document.getElementById('id_groupId').value = '';
+        }
+    });
+}
