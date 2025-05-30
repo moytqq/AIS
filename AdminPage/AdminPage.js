@@ -99,13 +99,18 @@ function generatePassword(length = 8) {
 async function checkIfUserExists() {
 
     const data = await fetchDBData()
-
+    let test = document.getElementById('id_userId').value;
     for (const user of data) {
         if (user.id == document.getElementById('id_userId').value) {
             return true;
         }
     }
 }
+async function checkIfGroupExists(groupName) {
+    const groups = await fetchGroups();
+    return groups.some(group => group.name === groupName);
+}
+
 document.getElementById('id_button_generate_login_password').addEventListener('click', e => {
     e.preventDefault();
 
@@ -130,14 +135,13 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
             name: SplittedFullName[1],
             secondName: SplittedFullName[0],
             patronymic: SplittedFullName[2],
-            groupId: document.getElementById('id_groupName-of-user').value
+            groupId: document.getElementById('id_groupId').value
         }
 
 
         if (await checkIfUserExists()) {
-            // data.userId = document.getElementById('id_userId').value;
-            // data.groupId = document.getElementById('id_groupName-of-user').value;
             document.getElementById('id_userId').value = '';
+            document.getElementById('id_groupId').value = '';
             putUser(data);
         }
         else {
@@ -146,9 +150,18 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
 
     }
     else {
-        const data = {
-            groupName: document.getElementById('id_groupName').value
+        const groupName = document.getElementById('id_groupName').value.trim();
+        if (!groupName) {
+            alert('Введите название группы');
+            return;
         }
+        
+        if (await checkIfGroupExists(groupName)) {
+            alert('Группа с таким названием уже существует');
+            return;
+        }
+        
+        const data = { groupName };
         addGroup(data);
     }
 
@@ -190,6 +203,7 @@ async function addGroup(data) {
 
 document.addEventListener('DOMContentLoaded', function () {
     fetchDBData();
+    setupGroupDropdowns();
 });
 
 async function fetchDBData() {
@@ -270,12 +284,18 @@ async function deleteRecord(id) {
     }
 }
 async function editRecord(id) {
-    const data = await fetchDBData();
-    data.forEach(user => {
+    const userdata = await fetchDBData();
+    const groupdata = await fetchGroups();
+    userdata.forEach(user => {
         if (user.id === id) {
             document.getElementById('id_groupName-of-user').value = `${user.group}`
             document.getElementById('id_userFullName').value = user.name
             document.getElementById('id_userId').value = user.id
+            groupdata.forEach(group => {
+                if (user.group === group.name) {
+                    document.getElementById('id_groupId').value = group.id
+                }
+            })
         }
     });
 }
@@ -301,3 +321,105 @@ async function putUser(data) {
     }
 
 }
+
+async function fetchGroups() {
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const response = await fetch(`${apiHost}/Users/Groups`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            },
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка при получении списка групп:', error);
+        return [];
+    }
+}
+
+async function setupGroupDropdowns() {
+    const groups = await fetchGroups();
+    
+    // Обработчики для кнопок в форме студента
+    document.querySelector('.tabs__input-group .profile-tooltip__button-chevron').addEventListener('click', function(e) {
+        e.preventDefault();
+        toggleGroupDropdown(this, groups, 'id_groupName-of-user');
+    });
+    
+    // Обработчики для кнопок в форме группы
+    document.querySelector('#group-tab .tabs__input-group .profile-tooltip__button-chevron').addEventListener('click', function(e) {
+        e.preventDefault();
+        toggleGroupDropdown(this, groups, 'id_groupName');
+    });
+}
+
+function toggleGroupDropdown(button, groups, inputId) {
+    // Проверяем, есть ли уже выпадающий список
+    const existingDropdown = button.nextElementSibling;
+    if (existingDropdown && existingDropdown.classList.contains('group-dropdown')) {
+        existingDropdown.remove();
+        return;
+    }
+    
+    // Создаем новый выпадающий список
+    const dropdown = document.createElement('div');
+    dropdown.className = 'group-dropdown';
+    dropdown.style.position = 'absolute';
+    dropdown.style.backgroundColor = '#fff';
+    dropdown.style.border = '1px solid #ddd';
+    dropdown.style.borderRadius = '5px';
+    dropdown.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    dropdown.style.zIndex = '1000';
+    dropdown.style.maxHeight = '200px';
+    dropdown.style.overflowY = 'auto';
+    dropdown.style.minWidth = '300px'; // Увеличиваем минимальную ширину
+    
+    // Добавляем группы в список
+    groups.forEach(group => {
+        const item = document.createElement('div');
+        item.textContent = group.name;
+        item.style.padding = '8px 12px';
+        item.style.cursor = 'pointer';
+        item.style.whiteSpace = 'normal'; // Разрешаем перенос текста
+        item.style.wordBreak = 'break-word'; // Переносим длинные слова
+        
+        item.addEventListener('click', () => {
+            document.getElementById(inputId).value = group.name;
+            if (group.id) {
+                document.getElementById("id_groupId").value = group.id;
+            }
+            dropdown.remove();
+        });
+        
+        item.addEventListener('mouseover', () => {
+            item.style.backgroundColor = '#f5f5f5';
+        });
+        
+        item.addEventListener('mouseout', () => {
+            item.style.backgroundColor = '#fff';
+        });
+        
+        dropdown.appendChild(item);
+    });
+    
+    // Позиционируем выпадающий список
+    const rect = button.getBoundingClientRect();
+    dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+    dropdown.style.left = `${rect.left + window.scrollX}px`;
+    
+    // Добавляем в DOM
+    document.body.appendChild(dropdown);
+    
+    // Закрываем при клике вне списка
+    const closeHandler = (e) => {
+        if (!dropdown.contains(e.target) && e.target !== button) {
+            dropdown.remove();
+            document.removeEventListener('click', closeHandler);
+        }
+    };
+    
+    document.addEventListener('click', closeHandler);
+}
+

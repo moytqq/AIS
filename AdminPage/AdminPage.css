@@ -107,7 +107,10 @@ input{
     width: 200px;
 }
 .tabs__input-userId input{
-    display: none;
+    /* display: none; */
+}
+.tabs__input-groupId input{
+    /* display: none; */
 }
 .form-register__button-generate, .admin-list__button-edit, .admin-list__button-delete{
     width: 32px;
@@ -133,6 +136,30 @@ input{
     color: #FFFFFF;
     border-radius: 20px;
 }
+
+.group-dropdown {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    min-width: 300px; /* Увеличиваем минимальную ширину */
+}
+
+.group-dropdown div {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: normal; /* Разрешаем перенос текста */
+    word-break: break-word; /* Переносим длинные слова */
+}
+
+.group-dropdown div:hover {
+    background-color: #f5f5f5;
+}
+
 .userinfo{
     width:fit-content;
     display: flex;
