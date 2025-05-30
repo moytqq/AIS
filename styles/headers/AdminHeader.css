@@ -82,6 +82,13 @@
     background-image: url("/img/Chevron_Down.svg");
     background-size: cover
 }
+
+.profile-tooltip__button-delete-task{
+    width: 31px;
+    height: 31px;
+    background-image: url("/img/button_delete.svg");
+    background-size: cover
+}
 .profile-tooltip__dropdown-content{
     display: none;
     position: absolute;
