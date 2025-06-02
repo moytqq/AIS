@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     editUserId = urlParams.get('userId');
     const userName = urlParams.get('userName');
-    const userGroup = urlParams.get('userGroup');
+    const userGroup = decodeURIComponent(urlParams.get('userGroup')) || '----------';
     isEditMode = !!editUserId;
 
     if (isEditMode) {
@@ -95,14 +95,14 @@ function populateTable(data) {
 
     data.forEach(row => {
         if (row.name != ' admin ') {
-
+            const group = row.group || '----------';;
             const tr = document.createElement('tr');
             tr.dataset.userId = row.id;
 
             tr.innerHTML = `
                 <td>
                     <input type="checkbox" class="user-checkbox" data-user-id="${row.id}">
-                    ${row.group}
+                    ${group}
                 </td>
                 <td>${row.name}</td>
             `;

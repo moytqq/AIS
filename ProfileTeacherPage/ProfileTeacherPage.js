@@ -91,11 +91,12 @@ function populateTasksTable(tasks) {
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
         const shortName = formatShortName(task.userName);
         const status = task.isSolved ? 'Выполнено' : 'Выдано';
+        const group = task.group || '----------';
         
         tr.innerHTML = `
             <td>α & β отсечение</td>
             <td>${shortName}</td>
-            <td>${task.group}</td>
+            <td>${group}</td>
             <td>${formattedDate}</td>
             <td>${status}</td>
             <td>
@@ -140,7 +141,6 @@ async function handleDeleteTask(e) {
 
         if (response.ok) {
             alert('Задание успешно удалено');
-            // Удаляем строку из таблицы
             button.closest('tr').remove();
         } else {
             throw new Error('Ошибка при удалении задания');
@@ -160,10 +160,17 @@ function handleEditTask(e) {
     window.location.href = `/TaskEditPage/TaskEditPage.html?userId=${userId}&userName=${encodeURIComponent(userName)}&userGroup=${encodeURIComponent(userGroup)}&taskId=${taskId}`;
 }
 function formatShortName(fullName) {
-    const parts = fullName.split(' ');
+    if (!fullName) return 'Неизвестный пользователь';
+    
+    const parts = fullName.split(' ').filter(Boolean);
+    
     if (parts.length >= 3) {
-        // Берём фамилию (0), первую букву имени (1) и отчества (2)
-        return `${parts[0]} ${parts[1][0]}. ${parts[2][0]}.`;
+        return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
+    } else if (parts.length === 2) {
+        return `${parts[0]} ${parts[1][0]}.`;
+    } else if (parts.length === 1) {
+        return parts[0];
     }
-    return fullName; // Возвращаем как есть, если формат не соответствует ожидаемому
+    
+    return fullName;
 }

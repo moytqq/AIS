@@ -4,8 +4,15 @@ function splitFullName(FullName, separator) {
 }
 function joinFullName(data) {
     data.forEach(row => {
-        row.name = [row.secondName, row.name, row.patronymic].join(' ');
-    })
+        const nameParts = [];
+        if (row.secondName) nameParts.push(row.secondName);
+        if (row.name) nameParts.push(row.name);
+        if (row.patronymic) nameParts.push(row.patronymic);
+        
+        row.name = nameParts.join(' ');
+        
+        row.group = row.group || '----------';
+    });
 }
 function generateLogin(fullName) {
     // 1. Транслитерация с русского на английский
@@ -144,7 +151,10 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
 
     const from_register_user = document.getElementById('id_form_register_user')
     const from_register_user_styles = window.getComputedStyle(from_register_user);
-
+    let id_groupId = document.getElementById('id_groupId').value
+    if (id_groupId == "") {
+        id_groupId = null;
+    }
     if (from_register_user_styles.display != 'none') {
         const SplittedFullName = splitFullName(document.getElementById('id_userFullName').value, " ")
 
@@ -155,7 +165,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
             name: SplittedFullName[1],
             secondName: SplittedFullName[0],
             patronymic: SplittedFullName[2],
-            groupId: document.getElementById('id_groupId').value
+            groupId: id_groupId
         }
 
 
