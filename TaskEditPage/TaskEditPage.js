@@ -4,13 +4,52 @@ function joinFullName(data) {
     });
 }
 
+let isEditMode = false;
+let editUserId = null;
+
 let allUsers = [];
 let selectedUserIds = [];
 
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    editUserId = urlParams.get('userId');
+    const userName = urlParams.get('userName');
+    const userGroup = urlParams.get('userGroup');
+    isEditMode = !!editUserId;
+
+    if (isEditMode) {
+        // Проверяем обязательные параметры
+        if (!editUserId || !userName || !userGroup) {
+            alert('Не переданы необходимые параметры для редактирования');
+            window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+            return;
+        }
+
+        // Заполняем таблицу переданными данными
+        const tableBody = document.querySelector('#admin-users-table tbody');
+        tableBody.innerHTML = '';
+        
+        const tr = document.createElement('tr');
+        tr.dataset.userId = editUserId;
+        tr.innerHTML = `
+            <td>
+                <input type="checkbox" class="user-checkbox" data-user-id="${editUserId}" checked disabled>
+                ${decodeURIComponent(userGroup)}
+            </td>
+            <td>${decodeURIComponent(userName)}</td>
+        `;
+        tableBody.appendChild(tr);
+        
+        // Устанавливаем выбранного пользователя
+        selectedUserIds = [editUserId];
+    } else {
+        // Обычный режим - загружаем всех пользователей
+        fetchDBData();
+    }
+});
 
 document.getElementById('profile-tooltip__button-logout').addEventListener('click', e => {
     e.preventDefault();
-
     Logout();
 })
 
@@ -28,9 +67,6 @@ async function Logout() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    fetchDBData();
-});
 
 async function fetchDBData() {
     try {
@@ -113,29 +149,43 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         
-        const requests = selectedUserIds.map(userId => 
-            fetch(`${apiHost}/AB/Users/${userId}/Assign?treeHeight=${parseInt(treeHeight)}`, {
-                method: 'POST',
+        if (isEditMode) {
+            // Режим редактирования - PUT запрос
+            const response = await fetch(`${apiHost}/AB/Users/${editUserId}?height=${parseInt(treeHeight)}&generate=true`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${authtoken}`
                 }
-            })
-        );
+            });
 
-        const responses = await Promise.all(requests);
-        
-        const allSuccess = responses.every(response => response.ok);
-        
-        if (allSuccess) {
-            alert('Задание успешно назначено выбранным пользователям');
-            clearCheckboxes();
+            if (response.ok) {
+                alert('Задание успешно обновлено');
+                window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+            } else {
+                throw new Error('Ошибка при обновлении задания');
+            }
         } else {
-            alert('Произошла ошибка при назначении задания некоторым пользователям');
+            // Режим создания - POST запрос
+            const response = await fetch(`${apiHost}/AB/Users/Assign?treeHeight=${parseInt(treeHeight)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${authtoken}`
+                },
+                body: JSON.stringify(selectedUserIds)
+            });
+
+            if (response.ok) {
+                alert('Задание успешно назначено');
+                clearCheckboxes();
+            } else {
+                throw new Error('Ошибка при назначении задания');
+            }
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        alert('Произошла ошибка при назначении задания');
+        alert('Произошла ошибка: ' + error.message);
     }
 });
 

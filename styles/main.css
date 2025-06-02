@@ -76,3 +76,29 @@ body {
     align-items: center;
     justify-content: center;
 }
+.button-generate, .button-edit, .button-delete{
+    background-image: url("/img/button_generate.png");
+    background-size: cover;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.button-edit{
+    background-image: url("/img/edit-svgrepo-com.svg");
+}
+.button-edit:hover {
+    opacity: 1;
+}
+.button-delete{
+    background-image: url("/img/button_delete.svg");
+    margin-left: 10px;
+}
+.button-delete:hover {
+    opacity: 1;
+}
