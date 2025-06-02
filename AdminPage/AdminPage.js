@@ -315,7 +315,7 @@ function populateTable(data) {
     joinFullName(data);
 
     data.forEach(row => {
-        if (row.name != ' admin ') {
+        if (row.name != 'admin') {
 
             const tr = document.createElement('tr');
 
