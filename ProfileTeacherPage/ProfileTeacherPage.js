@@ -43,10 +43,10 @@ async function fetchAssignedTasks() {
         const tasks = await tasksResponse.json();
         
         const tasksWithUserInfo = await Promise.all(
-            tasks.map(async task => {               
-                const user = task.user;
+            tasks.map(async assignment => {               
+                const user = assignment.user;
                 return {
-                    ...task.task,
+                    ...assignment.task,
                     userName: [user.secondName, user.name, user.patronymic].join(' '),
                     group: user.group
                 };
