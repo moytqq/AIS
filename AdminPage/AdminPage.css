@@ -107,10 +107,10 @@ input{
     width: 200px;
 }
 .tabs__input-userId input{
-    /* display: none; */
+    display: none;
 }
 .tabs__input-groupId input{
-    /* display: none; */
+    display: none;
 }
 .form-register__button-generate, .admin-list__button-edit, .admin-list__button-delete{
     width: 32px;

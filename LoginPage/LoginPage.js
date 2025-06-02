@@ -21,7 +21,13 @@ async function sendLoginForm(data) {
     const result = await res.json();
     if (res.status === 200){
         Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
-        window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html"
+        if (data.userName === 'Admin') {
+            window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html"    
+        }
+        else{
+            window.location.href = "/ProfileStudentPage/ProfileStudentPage.html"
+        }
+        
     }
     else {
         alert('Что-то пошло не так');

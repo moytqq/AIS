@@ -111,6 +111,26 @@ async function checkIfGroupExists(groupName) {
     return groups.some(group => group.name === groupName);
 }
 
+document.getElementById('profile-tooltip__button-logout').addEventListener('click', e => {
+    e.preventDefault();
+
+    Logout();
+})
+
+async function Logout() {
+    const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const res = await fetch(`${apiHost}/Users/Logout`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${authtoken}`
+        }
+    });
+
+    if (res.status === 200) {
+        window.location.href = "/LoginPage/LoginPage.html";
+    }
+}
+
 document.getElementById('id_button_generate_login_password').addEventListener('click', e => {
     e.preventDefault();
 
@@ -193,7 +213,6 @@ async function addGroup(groupName) {
         return false;
     }
 
-    // Проверяем, существует ли уже такая группа
     const groups = await fetchGroups();
     if (groups.some(group => group.name === groupName)) {
         alert('Группа с таким названием уже существует');
@@ -282,7 +301,7 @@ async function fetchDBData() {
 }
 function populateTable(data) {
     const tableBody = document.querySelector('#admin-users-table tbody');
-    tableBody.innerHTML = ''; // Очищаем таблицу перед заполнением
+    tableBody.innerHTML = '';
     joinFullName(data);
 
     data.forEach(row => {
@@ -395,24 +414,19 @@ async function fetchGroups() {
     }
 }
 
-// Новая версия setupGroupDropdowns
 async function setupGroupDropdowns() {
     const groups = await fetchGroups();
     
-    // Удаляем старые обработчики
     document.querySelectorAll('.profile-tooltip__button-chevron').forEach(btn => {
         btn.replaceWith(btn.cloneNode(true));
     });
 
-    // Вешаем новые обработчики с делегированием событий
     document.body.addEventListener('click', function(e) {
-        // Для кнопки в форме студента
         if (e.target.closest('#student-tab ~ .tabs__content .profile-tooltip__button-chevron')) {
             e.preventDefault();
             toggleGroupDropdown(e.target, groups, 'id_groupName-of-user', 'id_groupId');
         }
         
-        // Для кнопки в форме группы
         if (e.target.closest('#group-tab ~ .tabs__content .profile-tooltip__button-chevron')) {
             e.preventDefault();
             toggleGroupDropdown(e.target, groups, 'id_groupName');
@@ -420,28 +434,21 @@ async function setupGroupDropdowns() {
     });
 }
 
-// Улучшенная версия toggleGroupDropdown
 function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
     
-    // Проверяем, есть ли уже открытый дропдаун для этой кнопки
     const existingDropdown = button.nextElementSibling;
 
-    // Если дропдаун существует и это именно наш дропдаун - закрываем его
     if (existingDropdown && existingDropdown.classList.contains('group-dropdown')) {
         existingDropdown.remove();
         return;
         }
-    // Закрываем все открытые дропдауны
     document.querySelectorAll('.group-dropdown').forEach(d => d.remove());
     
-    // Создаем новый дропдаун
     const dropdown = document.createElement('div');
     dropdown.className = 'group-dropdown';
     
-    // Добавляем его сразу после кнопки в DOM
     button.parentNode.insertBefore(dropdown, button.nextSibling);
 
-    // Заполняем группами
     groups.forEach(group => {
         const item = document.createElement('div');
         item.className = 'group-dropdown-item';
@@ -458,7 +465,6 @@ function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
         dropdown.appendChild(item);
     });
 
-    // Позиционируем
     const rect = button.getBoundingClientRect();
     const parentRect = button.parentNode.getBoundingClientRect();
     
@@ -470,7 +476,6 @@ function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
         width: `${rect.width}px`
     });
     
-    // Обработчик закрытия при клике вне дропдауна
     const closeHandler = (e) => {
         if (!dropdown.contains(e.target) && e.target !== button) {
             dropdown.remove();
@@ -482,7 +487,6 @@ function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
 }
 
 function setupGroupButtons() {
-    // Обработчик для кнопки добавления группы
     document.querySelector('.profile-tooltip__button-add-group')?.addEventListener('click', async function(e) {
         e.preventDefault();
         const groupNameInput = document.getElementById('id_groupName-of-user');
@@ -495,13 +499,10 @@ function setupGroupButtons() {
 
         const success = await addGroup(groupName);
         if (success) {
-            // Обновляем список групп
             await setupGroupDropdowns();
-            // Не очищаем поле ввода, чтобы пользователь видел добавленную группу
-            document.getElementById('id_groupId').value = ''; // Очищаем ID
+            document.getElementById('id_groupId').value = '';
         }
     });
-    // Обработчик для кнопки удаления группы
     document.querySelector('.profile-tooltip__button-delete-group')?.addEventListener('click', async function(e) {
         e.preventDefault();
         const groupId = document.getElementById('id_groupId').value;
@@ -514,9 +515,7 @@ function setupGroupButtons() {
 
         const success = await deleteGroup(groupId);
         if (success) {
-            // Обновляем список групп
             await setupGroupDropdowns();
-            // Очищаем поле ввода
             document.getElementById('id_groupName-of-user').value = '';
             document.getElementById('id_groupId').value = '';
         }
