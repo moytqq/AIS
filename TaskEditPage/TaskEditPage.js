@@ -77,9 +77,7 @@ function populateTable(data) {
     setupCheckboxes();
 }
 
-// Функция для настройки обработчиков чекбоксов
 function setupCheckboxes() {
-    // Обработчик для "Выбрать все"
     document.getElementById('select-all-checkbox').addEventListener('change', function(e) {
         const checkboxes = document.querySelectorAll('.user-checkbox');
         checkboxes.forEach(checkbox => {
@@ -88,14 +86,12 @@ function setupCheckboxes() {
         updateSelectedUsers();
     });
 
-    // Обработчики для отдельных пользователей
     const checkboxes = document.querySelectorAll('.user-checkbox');
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateSelectedUsers);
     });
 }
 
-// Функция для обновления списка выбранных пользователей
 function updateSelectedUsers() {
     selectedUserIds = [];
     const checkboxes = document.querySelectorAll('.user-checkbox:checked');
@@ -104,7 +100,6 @@ function updateSelectedUsers() {
     });
 }
 
-// Модифицируем обработчик кнопки "Сохранить"
 document.querySelector('.admin-form__submit-button').addEventListener('click', async function(e) {
     e.preventDefault();
     
@@ -117,25 +112,39 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
     
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users/Assign`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${authtoken}`
-            },
-            body: JSON.stringify({
-                userIds: selectedUserIds,
-                treeHeight: parseInt(treeHeight)
+        
+        const requests = selectedUserIds.map(userId => 
+            fetch(`${apiHost}/AB/Users/${userId}/Assign?treeHeight=${parseInt(treeHeight)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${authtoken}`
+                }
             })
-        });
+        );
 
-        if (response.ok) {
+        const responses = await Promise.all(requests);
+        
+        const allSuccess = responses.every(response => response.ok);
+        
+        if (allSuccess) {
             alert('Задание успешно назначено выбранным пользователям');
+            clearCheckboxes();
         } else {
-            alert('Произошла ошибка при назначении задания');
+            alert('Произошла ошибка при назначении задания некоторым пользователям');
         }
     } catch (error) {
         console.error('Ошибка:', error);
         alert('Произошла ошибка при назначении задания');
     }
 });
+
+function clearCheckboxes() {
+    document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    document.getElementById('select-all-checkbox').checked = false;
+    
+    selectedUserIds = [];
+}

@@ -280,6 +280,24 @@ thead{
     position: sticky;
     top: 0;
 }
+.user-checkbox {
+    width: 28px;
+    height: 35px;
+    margin-right: 10px;
+}
+
+.tasksettings__content div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tasksettings__content input[type="number"] {
+    width: 60px;
+    height: 30px;
+    font-size: 18px;
+}
+
 .section-admin-list__date-n-button{
     display: flex;
     flex-direction: column;
