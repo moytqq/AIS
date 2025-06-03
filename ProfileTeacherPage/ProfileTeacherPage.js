@@ -42,29 +42,11 @@ async function fetchAssignedTasks() {
         
         const tasks = await tasksResponse.json();
         
-        // Для каждого задания получаем информацию о пользователе
         const tasksWithUserInfo = await Promise.all(
-            tasks.map(async task => {
-                const userResponse = await fetch(`${apiHost}/Users/${task.userId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${authtoken}`
-                    }
-                });
-                
-                if (!userResponse.ok) {
-                    console.error(`Ошибка при получении пользователя ${task.userId}`);
-                    return {
-                        ...task,
-                        userName: 'Неизвестный пользователь',
-                        group: 'Неизвестная группа'
-                    };
-                }
-                
-                const user = await userResponse.json();
+            tasks.map(async assignment => {               
+                const user = assignment.user;
                 return {
-                    ...task,
+                    ...assignment.task,
                     userName: [user.secondName, user.name, user.patronymic].join(' '),
                     group: user.group
                 };
