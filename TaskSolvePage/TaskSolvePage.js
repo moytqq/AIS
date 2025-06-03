@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// Функция для загрузки условия задачи
 async function fetchTaskData() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const response = await fetch(`${apiHost}/AB/Test`, {
@@ -33,7 +32,6 @@ async function fetchTaskData() {
     return await response.json();
 }
 
-// Обновлённая функция setupEventListeners
 function setupEventListeners(taskData) {
     document.getElementById('submit-solution').addEventListener('click', async function() {
         const userSolution = collectSolution();
@@ -58,22 +56,20 @@ function setupEventListeners(taskData) {
         Logout();
     });
 
-    // Обработчик кликов только по SVG-линиям веток
     document.addEventListener('click', function(e) {
         if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
             const line = e.target.classList.contains('hit-area') ? e.target.previousSibling : e.target;
             if (line.getAttribute('stroke') === '#808080') {
                 line.setAttribute('stroke', '#f44336'); // Красный
             } else if (line.getAttribute('stroke') === '#f44336') {
-                line.setAttribute('stroke', '#4CAF50'); // Зеленый
+                line.setAttribute('stroke', '#4CAF50');
             } else {
-                line.setAttribute('stroke', '#808080'); // Серый
+                line.setAttribute('stroke', '#808080');
             }
         }
     });
 }
 
-// Функция для отправки решения на сервер
 async function submitSolution(userSolution) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const response = await fetch(`${apiHost}/AB/Test`, {
@@ -82,7 +78,7 @@ async function submitSolution(userSolution) {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authtoken}`
         },
-        body: JSON.stringify(userSolution.nodes) // Отправляем только nodes в формате List<ABNodeModel>
+        body: JSON.stringify(userSolution.nodes)
     });
 
     if (!response.ok) {
@@ -92,27 +88,22 @@ async function submitSolution(userSolution) {
     return await response.json();
 }
 
-// Функция для проверки решения
 function checkSolution(userSolution, correctSolution) {
     const errors = [];
     const solutionMap = new Map(correctSolution.map(node => [node.id, node]));
 
-    // Проверяем только нелистовые узлы (с полями ввода)
     userSolution.nodes.forEach(node => {
-        if (!node.isLeaf) { // Проверяем только узлы с input
+        if (!node.isLeaf) { 
             const correctNode = solutionMap.get(node.id);
             if (correctNode) {
-                // Для корневого узла (id=0) проверяем a (α), для остальных — b (β)
                 const isRoot = node.id === 0;
                 const userValue = isRoot ? node.a : node.b;
                 const correctValue = isRoot ? correctNode.a : correctNode.b;
                 if (userValue !== correctValue) {
                     errors.push({ id: node.id, input: userValue, correct: correctValue, type: isRoot ? 'α' : 'β' });
-                    // Подсвечиваем поле с ошибкой
                     const input = document.querySelector(`input[data-node-id="${node.id}"]`);
                     if (input) input.classList.add('error-input');
                 } else {
-                    // Убираем подсветку, если значение корректно
                     const input = document.querySelector(`input[data-node-id="${node.id}"]`);
                     if (input) input.classList.remove('error-input');
                 }
@@ -126,7 +117,6 @@ function checkSolution(userSolution, correctSolution) {
     };
 }
 
-// Обновлённая функция renderTree
 function renderTree(node, parentContainer = null, level = 0) {
     const container = parentContainer || document.getElementById('tree-container');
     if (!parentContainer) container.innerHTML = '';
@@ -136,13 +126,12 @@ function renderTree(node, parentContainer = null, level = 0) {
     
     const nodeElement = document.createElement('div');
     nodeElement.className = 'tree-node';
-    nodeElement.dataset.nodeId = node.id; // Добавляем ID узла для идентификации
+    nodeElement.dataset.nodeId = node.id;
     
     if (!node.subNodes || node.subNodes.length === 0) {
         nodeElement.textContent = node.a;
         nodeElement.classList.add('leaf-node');
     } else {
-        // Поле ввода для корневого узла и узлов первого уровня
         nodeElement.innerHTML = `
             <div class="node-input">
                 <input type="text" data-node-id="${node.id}" value="" placeholder="${node.id === 0 ? 'α' : 'β'}">
@@ -158,48 +147,43 @@ function renderTree(node, parentContainer = null, level = 0) {
         childrenContainer.className = 'children-container';
         nodeWrapper.appendChild(childrenContainer);
         
-        // Создаем SVG для веток
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.className = 'branch-svg';
         svg.style.position = 'absolute';
         svg.style.top = '0';
         svg.style.left = '0';
         svg.style.width = '100%';
-        svg.style.height = '50px'; // Высота SVG равна padding-top children-container
+        svg.style.height = '50px';
         svg.style.zIndex = '1';
         childrenContainer.appendChild(svg);
         
-        // Динамическое позиционирование узлов и веток
         const childCount = node.subNodes.length;
-        const nodeWidth = level === 0 ? 210 : 70; // Ширина узлов
+        const nodeWidth = level === 0 ? 210 : 70;
         const totalWidth = childCount * nodeWidth;
-        const spacing = childCount === 1 ? 0 : totalWidth / childCount; // Расстояние между центрами узлов
+        const spacing = childCount === 1 ? 0 : totalWidth / childCount; 
         
         node.subNodes.forEach((childNode, index) => {
-            // Создаем ветку (SVG-линию)
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.classList.add('branch-line');
             line.dataset.parentId = node.id;
             line.dataset.childId = childNode.id;
-            line.setAttribute('stroke', '#808080'); // Изначально серый
+            line.setAttribute('stroke', '#808080');
             line.setAttribute('stroke-width', '4');
             line.style.cursor = 'pointer';
             
-            // Создаем прозрачную линию для увеличенной зоны клика
+           
             const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             hitArea.classList.add('hit-area');
             hitArea.setAttribute('stroke', 'transparent');
-            hitArea.setAttribute('stroke-width', '10'); // Зона клика 10px
+            hitArea.setAttribute('stroke-width', '10'); 
             hitArea.style.cursor = 'pointer';
             
-            // Координаты начала линии (центр нижней части родительского узла)
-            const x1 = '50%'; // Центр родительского узла
-            const y1 = 0; // Верх SVG (низ родительского узла)
+            const x1 = '50%'; 
+            const y1 = 0; 
             
-            // Координаты конца линии (центр верхней части дочернего узла)
             const offset = (index * spacing) - (totalWidth - nodeWidth) / 2;
-            const x2 = `calc(50% + ${offset}px)`; // Центр дочернего узла
-            const y2 = 50; // Низ SVG (верх дочернего узла)
+            const x2 = `calc(50% + ${offset}px)`;
+            const y2 = 50;
             
             line.setAttribute('x1', x1);
             line.setAttribute('y1', y1);
@@ -217,14 +201,12 @@ function renderTree(node, parentContainer = null, level = 0) {
     }
 }
 
-// Обновлённая функция collectSolution
 function collectSolution() {
     const solution = {
         nodes: [],
         branches: []
     };
     
-    // Собираем данные узлов
     document.querySelectorAll('.tree-node').forEach(nodeElement => {
         const nodeId = parseInt(nodeElement.dataset.nodeId);
         const isLeaf = nodeElement.classList.contains('leaf-node');
@@ -234,15 +216,14 @@ function collectSolution() {
         
         if (isLeaf) {
             a = convertInputValue(nodeElement.textContent);
-            b = a; // Для листовых узлов a и b равны
+            b = a;
         } else if (nodeId === 0) {
             a = convertInputValue(nodeElement.querySelector('.node-input input').value);
-            b = 2147483647; // Для корневого узла b по умолчанию
+            b = 2147483647;
         } else {
             b = convertInputValue(nodeElement.querySelector('.node-input input').value);
-            a = -2147483648; // Для узлов первого уровня a по умолчанию
+            a = -2147483648;
         }
-        
         solution.nodes.push({
             id: nodeId,
             a: a,
@@ -251,7 +232,6 @@ function collectSolution() {
         });
     });
     
-    // Собираем данные веток (игнорируются при проверке)
     document.querySelectorAll('.branch-line').forEach(line => {
         const parentId = parseInt(line.dataset.parentId);
         const childId = parseInt(line.dataset.childId);
@@ -269,10 +249,9 @@ function collectSolution() {
     return solution;
 }
 
-// Вспомогательная функция для преобразования значений
 function convertInputValue(value) {
     const num = parseInt(value);
-    return isNaN(num) ? null : num; // Возвращаем null для пустых значений
+    return isNaN(num) ? null : num;
 }
 
 async function Logout() {

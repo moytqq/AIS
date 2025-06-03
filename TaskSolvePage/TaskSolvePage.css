@@ -301,18 +301,17 @@
 .node-input input {
     width: 60px;
     padding: 8px;
-    border: 1px solid #808080; /* Серый цвет границы */
+    border: 1px solid #808080; 
     border-radius: 4px;
     text-align: center;
     font-size: 16px;
-    background-color: #F5F5F5; /* Светло-серый фон */
+    background-color: #F5F5F5; 
 }
 
 .node-input input.error-input {
-    border: 2px solid #f44336; /* Красная граница для ошибок */
-    background-color: #ffebee; /* Светло-красный фон для ошибок */
+    border: 2px solid #f44336; 
+    background-color: #ffebee;
 }
-
 .level-0 .tree-node {
     border-color: #4a554a;
     background-color: #cecece;
@@ -396,5 +395,5 @@
 }
 
 .branch-svg .branch-line:hover {
-    stroke-width: 6; /* Утолщение при наведении */
+    stroke-width: 6;
 }
