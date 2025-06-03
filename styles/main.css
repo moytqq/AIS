@@ -76,9 +76,8 @@ body {
     align-items: center;
     justify-content: center;
 }
-.button-generate, .button-edit, .button-delete{
-    background-image: url("/img/button_generate.png");
-    background-size: cover;
+.button-generate, .button-edit, .button-delete, .button-solve{
+    background-size: contain;
     width: 40px;
     height: 40px;
     border: none;
@@ -86,8 +85,12 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     cursor: pointer;
+    vertical-align: middle;
     opacity: 0.7;
     transition: opacity 0.2s;
+}
+.button-generate{
+    background-image: url("/img/button_generate.png");
 }
 .button-edit{
     background-image: url("/img/edit-svgrepo-com.svg");
@@ -101,4 +104,27 @@ body {
 }
 .button-delete:hover {
     opacity: 1;
+}
+.button-solve {
+    background-image: url("/img/button_solve.svg");
+}
+.button-solve:hover{
+    opacity: 1
+}
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #EDEDED;
+}
+
+.actions-cell {
+    white-space: nowrap;
+    text-align: center;
+    padding: 5px !important;
+}
+
+.given-tasks-table__table tbody td {
+    padding: 8px 12px;
+    vertical-align: middle;
 }

@@ -250,7 +250,7 @@ input{
 }
 .section-admin-list__content{
     overflow: auto;
-    height: 350px;
+    height: 450px;
     font-weight: 350;
     font-size: 24px;
     scrollbar-width:thin;

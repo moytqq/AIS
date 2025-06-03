@@ -315,21 +315,21 @@ function populateTable(data) {
     joinFullName(data);
 
     data.forEach(row => {
-        if (row.name != 'admin') {
+        
 
             const tr = document.createElement('tr');
 
             tr.innerHTML = `
                 <td>${row.group}</td>
                 <td>${row.name}</td>
-                <td>
-                    <button id="id_admin-list__button-edit" class="admin-list__button-edit" data-id="${row.id}"></button> 
-                    <button id="id_admin-list__button-delete" class="admin-list__button-delete" data-id="${row.id}"></button>
+                <td class="actions-cell">
+                    <button class="button-edit" id="id_admin-list__button-edit" data-id="${row.id}" title="Редактировать"></button>
+                    <button class="button-delete" id="id_admin-list__button-delete" data-id="${row.id} title="Удалить"></button>
                 </td>
             `;
 
             tableBody.appendChild(tr);
-        }
+        
     });
 
     document.querySelectorAll('.admin-list__button-delete').forEach(btn => {

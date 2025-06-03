@@ -1,3 +1,7 @@
+document.addEventListener('DOMContentLoaded', function() {
+    fetchAssignedTasks();
+});
+
 document.getElementById('profile-tooltip__button-logout').addEventListener('click', e => {
     e.preventDefault();
 
@@ -16,4 +20,67 @@ async function Logout() {
     if (res.status === 200) {
         window.location.href = "/LoginPage/LoginPage.html";
     }
+}
+
+async function fetchAssignedTasks() {
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        
+        // Получаем задание студента
+        const response = await fetch(`${apiHost}/AB/Test`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                // Задание не найдено - это нормально, просто покажем пустую таблицу
+                return;
+            }
+            throw new Error('Ошибка при получении задания');
+        }
+        
+        const taskData = await response.json();
+        populateTasksTable(taskData);
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при загрузке заданий');
+    }
+}
+
+function populateTasksTable(taskData) {
+    const tableBody = document.querySelector('.given-tasks-table__table tbody');
+    tableBody.innerHTML = '';
+
+    if (!taskData) return;
+
+    // Формируем дату (можно добавить реальную дату из задания, если она есть)
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}.${(currentDate.getMonth() + 1).toString().padStart(2, '0')}.${currentDate.getFullYear()}`;
+
+    // Определяем статус задания
+    const status = taskData.solution ? (taskData.userSolution ? 'Проверено' : 'Выполнено') : 'Выдано';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>α & β отсечение</td>
+        <td>Преподаватель</td> <!-- Можно заменить на реальное имя преподавателя -->
+        <td>${formattedDate}</td>
+        <td>${status}</td>
+        <td>
+            <button class="button-solve" data-task-id="ab-task"></button>
+        </td>
+    `;
+    
+    tableBody.appendChild(tr);
+
+    // Добавляем обработчик для кнопки решения
+    document.querySelector('.button-solve').addEventListener('click', function() {
+        // Сохраняем данные задания в sessionStorage для использования на странице решения
+        sessionStorage.setItem('currentTask', JSON.stringify(taskData));
+        window.location.href = "/TaskSolvePage/TaskSolvePage.html";
+    });
 }
