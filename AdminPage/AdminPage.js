@@ -324,7 +324,7 @@ function populateTable(data) {
                 <td>${row.name}</td>
                 <td class="actions-cell">
                     <button class="button-edit" id="id_admin-list__button-edit" data-id="${row.id}" title="Редактировать"></button>
-                    <button class="button-delete" id="id_admin-list__button-delete" data-id="${row.id} title="Удалить"></button>
+                    <button class="button-delete" id="id_admin-list__button-delete" data-id="${row.id}" title="Удалить"></button>
                 </td>
             `;
 
@@ -332,18 +332,17 @@ function populateTable(data) {
         
     });
 
-    document.querySelectorAll('.admin-list__button-delete').forEach(btn => {
+    document.querySelectorAll('#id_admin-list__button-delete').forEach(btn => {
         btn.addEventListener('click', async function () {
             if (confirm('Вы уверены, что хотите удалить эту запись?')) {
                 await deleteRecord(this.getAttribute('data-id'));
-                fetchDBData();
             }
 
         });
     });
-    document.querySelectorAll('.admin-list__button-edit').forEach(btn => {
-        btn.addEventListener('click', function () {
-            editRecord(this.getAttribute('data-id'));
+    document.querySelectorAll('#id_admin-list__button-edit').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            await editRecord(this.getAttribute('data-id'));
         });
     });
 };
