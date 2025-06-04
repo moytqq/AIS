@@ -207,29 +207,34 @@
 .given-tasks-table__content {
     overflow-x: auto;
     overflow-y: auto;
-    height: 350px;
+    max-height: 350px;
     font-weight: 350;
     font-size: 24px;
     scrollbar-width: thin;
     scrollbar-color: #7B70EE #D9D9D9;
+    position: relative;
 }
-/* Оптимальные ширины столбцов */
 .given-tasks-table__table td:nth-child(1) { width: 20%; } /* Задание */
 .given-tasks-table__table td:nth-child(2) { width: 20%; } /* Студент */
 .given-tasks-table__table td:nth-child(3) { width: 20%; } /* Группа */
 .given-tasks-table__table td:nth-child(4) { width: 15%; } /* Дата */
 .given-tasks-table__table td:nth-child(5) { width: 15%; } /* Статус */
-.given-tasks-table__table td:nth-child(6) { width: 5%; } /* Действия */
+.given-tasks-table__table td:nth-child(6) {     
+    width: 10%;
+    min-width: 100px;
+} /* Действия */
 
 .given-tasks-table__table {
 	width: 100%;
 	border-collapse: separate;
-
 }
 .given-tasks-table__table thead th {
-	font-weight: bold;
+	position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #EDEDED;
+    font-weight: bold;
 	text-align: left;
-	border: none;
 	padding: 10px 15px;
 	background: #EDEDED;
 	font-size: 24px;

@@ -81,18 +81,30 @@
     font-size: 32px;
 }
 .given-tasks-table__content{
-    overflow: auto;
-    height: 350px;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 350px;
     font-weight: 350;
     font-size: 24px;
+    scrollbar-width: thin;
+    scrollbar-color: #7B70EE #D9D9D9;
 }
 .given-tasks-table__table {
 	width: 100%;
 	border: none;
 	border-collapse: separate;
 }
+.given-tasks-table__table td:nth-child(1) { width: 25%; } /* Задание */
+.given-tasks-table__table td:nth-child(2) { width: 25%; } /* Преподаватель */
+.given-tasks-table__table td:nth-child(3) { width: 20%; } /* Дата */
+.given-tasks-table__table td:nth-child(4) { width: 15%; } /* Статус */
+.given-tasks-table__table td:nth-child(5) { width: 15%; } /* Действия */
+
 .given-tasks-table__table thead th {
-	font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    font-weight: bold;
 	text-align: left;
 	border: none;
 	padding: 10px 15px;

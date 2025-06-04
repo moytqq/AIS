@@ -60,7 +60,6 @@ async function fetchAssignedTasks() {
     }
 }
 
-// Заполнение таблицы заданиями
 function populateTasksTable(tasks) {
     const tableBody = document.querySelector('.given-tasks-table__table tbody');
     tableBody.innerHTML = '';
@@ -81,27 +80,22 @@ function populateTasksTable(tasks) {
             <td>${group}</td>
             <td>${formattedDate}</td>
             <td>${status}</td>
-            <td>
-                <button class="button-edit" data-task-id="${task.id}" data-user-id="${task.userId}"></button>
-                <button class="button-delete" data-task-id="${task.id}" data-user-id="${task.userId}"></button>
+            <td class="actions-cell">
+                <button class="button-edit" data-task-id="${task.id}" data-user-id="${task.userId}" title="Редактировать"></button>
+                <button class="button-delete" data-task-id="${task.id}" data-user-id="${task.userId}" title="Удалить"></button>
             </td>
         `;
         
         tableBody.appendChild(tr);
     });
-
-    // Добавляем обработчики для кнопок удаления
     document.querySelectorAll('.button-delete').forEach(button => {
         button.addEventListener('click', handleDeleteTask);
     }); 
-    // Обработчики для кнопок редактирования
     document.querySelectorAll('.button-edit').forEach(button => {
         button.addEventListener('click', handleEditTask);
     }); 
-    // О
 }
 
-// Обработчик удаления задания
 async function handleDeleteTask(e) {
     const button = e.currentTarget;
     const taskId = button.dataset.taskId;
