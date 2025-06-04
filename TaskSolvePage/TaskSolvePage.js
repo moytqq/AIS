@@ -68,7 +68,7 @@ function setupEventListeners(taskData) {
             }
         }
     });
-}
+}1
 
 async function submitSolution(userSolution) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
@@ -78,7 +78,10 @@ async function submitSolution(userSolution) {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authtoken}`
         },
-        body: JSON.stringify(userSolution.nodes)
+        body: JSON.stringify({
+            'nodes': userSolution.nodes,
+            'path': Array.from(userSolution.branches)
+        })
     });
 
     if (!response.ok) {
@@ -204,7 +207,7 @@ function renderTree(node, parentContainer = null, level = 0) {
 function collectSolution() {
     const solution = {
         nodes: [],
-        branches: []
+        branches: new Set()
     };
     
     document.querySelectorAll('.tree-node').forEach(nodeElement => {
@@ -228,7 +231,6 @@ function collectSolution() {
             id: nodeId,
             a: a,
             b: b,
-            isLeaf: isLeaf
         });
     });
     
@@ -237,13 +239,12 @@ function collectSolution() {
         const childId = parseInt(line.dataset.childId);
         let color = 'grey';
         if (line.getAttribute('stroke') === '#f44336') color = 'red';
-        if (line.getAttribute('stroke') === '#4CAF50') color = 'green';
-        
-        solution.branches.push({
-            parentId: parentId,
-            childId: childId,
-            color: color
-        });
+        if (line.getAttribute('stroke') === '#4CAF50') 
+        {
+            color = 'green';
+            solution.branches.add(parentId)
+            solution.branches.add(childId);
+        }
     });
     
     return solution;
