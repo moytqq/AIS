@@ -76,6 +76,7 @@
     gap: 30px;
     margin: 10px 125px 10px 125px;
     padding: 10px;
+    min-height: 400px;
 }
 .given-tasks-table__header{
     font-size: 32px;
@@ -83,11 +84,13 @@
 .given-tasks-table__content{
     overflow-x: auto;
     overflow-y: auto;
+    min-height: 350px;
     max-height: 350px;
     font-weight: 350;
     font-size: 24px;
     scrollbar-width: thin;
     scrollbar-color: #7B70EE #D9D9D9;
+    border-radius: 10px;
 }
 .given-tasks-table__table {
 	width: 100%;
