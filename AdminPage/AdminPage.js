@@ -113,7 +113,11 @@ async function checkIfUserExists() {
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        return true
+        if (response.status === 200)
+        {
+            return true;
+        }
+        return false;
     } catch (error) {
         return false;
     }
