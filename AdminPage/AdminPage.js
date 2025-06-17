@@ -104,15 +104,21 @@ function generatePassword(length = 8) {
     return password;
 }
 async function checkIfUserExists() {
-
-    const data = await fetchDBData()
-    let test = document.getElementById('id_userId').value;
-    for (const user of data) {
-        if (user.id == document.getElementById('id_userId').value) {
-            return true;
-        }
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const response = await fetch(`${apiHost}/Users/${document.getElementById('id_userId').value}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            },
+        });
+        return true
+    } catch (error) {
+        return false;
     }
 }
+
 async function checkIfGroupExists(groupName) {
     const groups = await fetchGroups();
     return groups.some(group => group.name === groupName);
@@ -152,9 +158,6 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
     const from_register_user = document.getElementById('id_form_register_user')
     const from_register_user_styles = window.getComputedStyle(from_register_user);
     let id_groupId = document.getElementById('id_groupId').value
-    if (id_groupId == "") {
-        id_groupId = null;
-    }
     if (from_register_user_styles.display != 'none') {
         const SplittedFullName = splitFullName(document.getElementById('id_userFullName').value, " ")
 
@@ -164,7 +167,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
             password: document.getElementById('id_userPassword').value,
             name: SplittedFullName[1],
             secondName: SplittedFullName[0],
-            patronymic: SplittedFullName[2],
+            patronymic: SplittedFullName[2] || "-",
             groupId: id_groupId
         }
 
@@ -368,37 +371,48 @@ async function deleteRecord(id) {
     }
 }
 async function editRecord(id) {
-    const userdata = await fetchDBData();
-    const groupdata = await fetchGroups();
-    userdata.forEach(user => {
-        if (user.id === id) {
-            document.getElementById('id_groupName-of-user').value = `${user.group}`
-            document.getElementById('id_userFullName').value = user.name
-            document.getElementById('id_userId').value = user.id
-            groupdata.forEach(group => {
-                if (user.group === group.name) {
-                    document.getElementById('id_groupId').value = group.id
-                }
-            })
-        }
-    });
-}
-
-async function putUser(data) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users/${data.userId}`, {
-            method: 'PUT',
+        const response = await fetch(`${apiHost}/Users/${id}`, {
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${authtoken}`
             },
-            body: JSON.stringify(data)
+        });
+        var userdata = await response.json();
+    } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+    }
+    document.getElementById('id_groupName-of-user').value = userdata.group || '----------'
+    document.getElementById('id_userFullName').value = [userdata.secondName, userdata.name, userdata.patronymic].join(' ')
+    document.getElementById('id_userId').value = userdata.id
+    document.getElementById('id_groupId').value = userdata.groupId 
+}
+
+async function putUser(data) {
+    var form_data = new FormData();
+    for ( var key in data ) {
+        if (key !== 'userId') {
+            form_data.append(key, data[key]);
+        }
+    }
+
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const response = await fetch(`${apiHost}/Users?userId=${data.userId}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${authtoken}`
+            },
+            body: form_data
         });
         if (response.status == 200) {
             alert('Запись успешно изменена');
         }
-        else{alert('oops')}
+        else{
+            alert('oops')
+        }
         fetchDBData();
     } catch (error) {
 
