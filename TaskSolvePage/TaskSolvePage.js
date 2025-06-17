@@ -242,7 +242,6 @@ function collectSolution() {
         if (line.getAttribute('stroke') === '#4CAF50') 
         {
             color = 'green';
-            solution.branches.add(parentId)
             solution.branches.add(childId);
         }
     });
