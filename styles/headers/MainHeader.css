@@ -1,7 +1,8 @@
 .header-wrapper{
     display: flex;
     max-width: var(--wrapper-width, 1440px);
-    width: 90%;
+    width: 90vw;
+    height: auto;
     background-color: #FFFAFA;
     margin-left: auto;
     margin-right: auto;

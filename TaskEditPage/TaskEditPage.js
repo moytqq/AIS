@@ -101,7 +101,7 @@ function populateTable(data) {
 
             tr.innerHTML = `
                 <td>
-                    <input type="checkbox" class="user-checkbox" data-user-id="${row.id}">
+                    <input type="checkbox" class="section-admin-list__checkbox" data-user-id="${row.id}">
                     ${group}
                 </td>
                 <td>${row.name}</td>
