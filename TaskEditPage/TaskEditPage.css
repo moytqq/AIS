@@ -1,8 +1,8 @@
-/* Основные стили */
 .main-wrapper {
     background-color: #FFFAFA;
     color: #000000;
     width: 90vw;
+    min-height: calc(100vh - 170px);
     max-width: var(--wrapper-width, 1440px);
     margin: 12px auto 15px;
     padding-bottom: 45px;
@@ -96,15 +96,11 @@
     margin-left: 10%;
     margin-right: 10%;
     margin-top: 10px;
-    /* margin: 10px 15px;
-    padding: 10px;
-    padding-left: 10%;
-    padding-right: 10%; */
 }
 
 .section-admin-list__content {
     overflow-y: auto;
-    max-height: 350px;
+    max-height: 420px;
     font-weight: 350;
     font-size: clamp(16px, 3vw, 18px);
     scrollbar-width: thin;
@@ -187,9 +183,6 @@
     align-items: start;
     gap: 15px;
 }
-/* .section-admin-list__table td:nth-child(1) { width: 50%; } 
-.section-admin-list__table td:nth-child(2) { width: 50%; } */
-
 .section-admin-list__finaldate {
     display: flex;
     align-items: center;
@@ -234,7 +227,6 @@
     border-radius: 4px;
 }
 
-/* Адаптивные стили */
 @media (max-width: 768px) {
     .main-wrapper__section-taskedit {
         flex-direction: column;

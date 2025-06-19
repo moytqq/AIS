@@ -18,14 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
     isEditMode = !!editUserId;
 
     if (isEditMode) {
-        // Проверяем обязательные параметры
         if (!editUserId || !userName || !userGroup) {
             alert('Не переданы необходимые параметры для редактирования');
             window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
             return;
         }
 
-        // Заполняем таблицу переданными данными
         const tableBody = document.querySelector('#admin-users-table tbody');
         tableBody.innerHTML = '';
         
@@ -40,10 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         tableBody.appendChild(tr);
         
-        // Устанавливаем выбранного пользователя
         selectedUserIds = [editUserId];
     } else {
-        // Обычный режим - загружаем всех пользователей
         fetchDBData();
     }
 });
@@ -66,7 +62,6 @@ async function Logout() {
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }
-
 
 async function fetchDBData() {
     try {
@@ -95,13 +90,13 @@ function populateTable(data) {
 
     data.forEach(row => {
         if (row.name != ' admin ') {
-            const group = row.group || '----------';;
+            const group = row.group || '----------';
             const tr = document.createElement('tr');
             tr.dataset.userId = row.id;
 
             tr.innerHTML = `
                 <td>
-                    <input type="checkbox" class="section-admin-list__checkbox" data-user-id="${row.id}">
+                    <input type="checkbox" class="user-checkbox" data-user-id="${row.id}">
                     ${group}
                 </td>
                 <td>${row.name}</td>
@@ -145,13 +140,14 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
     }
 
     const treeHeight = document.getElementById('tree-height-input').value;
+    const max = document.getElementById('max-input').value;
+    const template = document.getElementById('template-input').value;
     
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         
         if (isEditMode) {
-            // Режим редактирования - PUT запрос
-            const response = await fetch(`${apiHost}/AB/Users/${editUserId}?height=${parseInt(treeHeight)}&generate=true`, {
+            const response = await fetch(`${apiHost}/AB/Users/${editUserId}?height=${parseInt(treeHeight)}&maxValue=${parseInt(max)}&template=${parseInt(template)}&generate=true`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -166,8 +162,7 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
                 throw new Error('Ошибка при обновлении задания');
             }
         } else {
-            // Режим создания - POST запрос
-            const response = await fetch(`${apiHost}/AB/Users/Assign?treeHeight=${parseInt(treeHeight)}`, {
+            const response = await fetch(`${apiHost}/AB/Users/Assign?treeHeight=${parseInt(treeHeight)}&max=${parseInt(max)}&template=${parseInt(template)}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
