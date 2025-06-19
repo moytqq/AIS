@@ -83,7 +83,7 @@ function setupEventListeners(taskData) {
         Logout();
     });
 
-    document.addEventListener('click', function(e) {
+    document.querySelector('.section-tasksolve__task-display').addEventListener('click', function(e) {
         if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
             e.preventDefault();
             const line = e.target.classList.contains('hit-area') ? e.target.previousSibling : e.target;
@@ -94,12 +94,39 @@ function setupEventListeners(taskData) {
             } else {
                 line.setAttribute('stroke', '#f44336');
             }
+        } else if (e.target.classList.contains('tree-node')) {
+            e.preventDefault();
+            let node = e.target;
+            let id = parseInt(node.dataset.nodeId)
+            let line = document.querySelector(`.branch-line[data-child-id="${id}"]`);
+            if (line === null)
+            {
+                return;
+            }  
+            let currColor = line.getAttribute('stroke') === '#f44336' ? '#808080' : '#f44336'
+            line.setAttribute('stroke', currColor);
+
+            currColor = line.getAttribute('stroke') === '#808080' ? '#808080' : '#f44336'
+            id = line.dataset.childId
+            let lines = document.querySelectorAll(`.branch-line[data-parent-id="${id}"]`);
+            if (lines === null)
+            {
+                return;
+            }
+            lines.forEach(line =>
+                {
+                    line.setAttribute('stroke', currColor);
+                }
+            )
         }
     });
 
-    document.addEventListener('contextmenu', function(e) {
+    document.querySelector('.section-tasksolve__task-display').addEventListener('contextmenu', function(e) {
+        if (e.target.tagName === 'INPUT') {
+            return;
+        }
+        e.preventDefault();
         if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
-            e.preventDefault();
             const line = e.target.classList.contains('hit-area') ? e.target.previousSibling : e.target;
             const parentId = parseInt(line.dataset.parentId);
             const childId = parseInt(line.dataset.childId);
@@ -145,6 +172,79 @@ function setupEventListeners(taskData) {
                 
                 line.setAttribute('stroke', '#4CAF50');
             }
+        } else if (e.target.classList.contains('tree-node')) {
+            let node = e.target;
+            let id = parseInt(node.dataset.nodeId)
+            let lines = [document.querySelector(`.branch-line[data-child-id="${id}"]`)];
+            if (lines[0] === null) {
+                return;
+            }
+            lines.push(document.querySelector(`.branch-line[data-child-id="${lines[0].dataset.parentId}"]`))
+            let prevLineColor = null;
+            lines.forEach(line => {
+                if (line === null)
+                {
+                    document.querySelectorAll(`.branch-line[data-parent-id="${node.dataset.nodeId}"]`).forEach(
+                        line => {
+                            if (line.getAttribute('stroke') === '#4CAF50') {
+                                line.setAttribute('stroke', '#808080');
+                            }
+                        }
+                    )
+                    return;
+                }
+                let currColor = line.getAttribute('stroke') 
+                if (currColor === prevLineColor || prevLineColor && currColor === '#4CAF50')
+                {
+                    return;
+                }
+                const parentId = parseInt(line.dataset.parentId);
+                const childId = parseInt(line.dataset.childId);
+                const currentColor = line.getAttribute('stroke');
+                
+                if (currentColor === '#4CAF50') {
+                    line.setAttribute('stroke', '#808080');
+                }
+                else {
+                    let levelOneNodeId;
+                    if (parentId === 0) {
+                        levelOneNodeId = childId;
+                    } else {
+                        const parentLine = document.querySelector(`.branch-line[data-child-id="${parentId}"]`);
+                        if (parentLine) {
+                            levelOneNodeId = parseInt(parentLine.dataset.childId);
+                        }
+                    }
+                    
+                    if (levelOneNodeId) {
+                        document.querySelectorAll('.branch-line').forEach(otherLine => {
+                            const otherChildId = parseInt(otherLine.dataset.childId);
+                            const otherParentId = parseInt(otherLine.dataset.parentId);
+                            let otherLevelOneNodeId;
+                            if (otherParentId === 0) {
+                                otherLevelOneNodeId = otherChildId;
+                            } else {
+                                const otherParentLine = document.querySelector(`.branch-line[data-child-id="${otherParentId}"]`);
+                                if (otherParentLine) {
+                                    otherLevelOneNodeId = parseInt(otherParentLine.dataset.childId);
+                                }
+                            }
+                            if (otherLevelOneNodeId && otherLevelOneNodeId !== levelOneNodeId && otherLine.getAttribute('stroke') === '#4CAF50') {
+                                otherLine.setAttribute('stroke', '#808080');
+                            }
+                        });
+                    }
+                    
+                    document.querySelectorAll(`.branch-line[data-parent-id="${parentId}"]`).forEach(siblingLine => {
+                        if (siblingLine !== line && siblingLine.getAttribute('stroke') === '#4CAF50') {
+                            siblingLine.setAttribute('stroke', '#808080');
+                        }
+                    });
+                    
+                    line.setAttribute('stroke', '#4CAF50');
+                }
+                prevLineColor = line.getAttribute('stroke')
+            });
         }
     });
     
