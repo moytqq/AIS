@@ -211,7 +211,6 @@
     cursor: pointer;
 }
 
-/* Стили для скроллбара */
 .section-admin-list__content::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -226,7 +225,10 @@
     background-color: #7B70EE;
     border-radius: 4px;
 }
-
+.user-checkbox{
+    width: 28px;
+    height: 28px;
+}
 @media (max-width: 768px) {
     .main-wrapper__section-taskedit {
         flex-direction: column;

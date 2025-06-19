@@ -76,7 +76,7 @@ body {
     align-items: center;
     justify-content: center;
 }
-.button-generate, .button-edit, .button-delete, .button-solve{
+.button-generate, .button-edit, .button-delete, .button-solve, .button-view{
     background-size: contain;
     width: 40px;
     height: 40px;
@@ -109,6 +109,13 @@ body {
     background-image: url("/img/button_solve.svg");
 }
 .button-solve:hover{
+    opacity: 1
+}
+.button-view {
+    background-image: url('/img/history.svg');
+    margin-left: 8px;
+}
+.button-view:hover{
     opacity: 1
 }
 thead {

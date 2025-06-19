@@ -1,87 +1,152 @@
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const taskData = await fetchTaskData();
+        const urlParams = new URLSearchParams(window.location.search);
+        const isViewMode = urlParams.get('view') === 'true';
+        const taskId = urlParams.get('taskId');
+        const userId = urlParams.get('userId');
+
+        const taskData = await fetchTaskData(taskId, userId, isViewMode);
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
-            window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+            window.location.href = isViewMode ? "/ProfileTeacherPage/ProfileTeacherPage.html" : "/ProfileStudentPage/ProfileStudentPage.html";
             return;
         }
-        renderTree(taskData.problem.head);
-        setupEventListeners(taskData);
+
+        renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
+        setupEventListeners(taskData, isViewMode);
+
+        if (isViewMode) {
+            document.querySelectorAll('.node-input input').forEach(input => {
+                input.disabled = true;
+            });
+            const submitButton = document.getElementById('submit-solution');
+            if (submitButton) {
+                submitButton.style.display = 'none';
+            }
+            const solutionMessage = document.getElementById('solution-message');
+            if (solutionMessage) {
+                solutionMessage.style.display = 'none';
+            }
+        }
     } catch (error) {
         console.error('Ошибка загрузки задачи:', error);
         alert('Не удалось загрузить задачу');
-        window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+        window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
     }
 });
 
-async function fetchTaskData() {
+async function fetchTaskData(taskId, userId, isViewMode) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const response = await fetch(`${apiHost}/AB/Test`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authtoken}`
+    let url;
+    let response;
+
+    if (isViewMode && userId) {
+        url = `${apiHost}/AB/Users/${userId}`;
+        response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка при получении данных пользователя: ${response.status} ${response.statusText}`);
         }
-    });
 
-    if (!response.ok) {
-        throw new Error('Ошибка при получении задачи');
+        const data = await response.json();
+        if (!data.task || !data.task.problem) {
+            throw new Error('Данные задачи отсутствуют в ответе');
+        }
+
+        if (isViewMode && data.user) {
+            const studentInfo = document.getElementById('student-info');
+            if (studentInfo) {
+                const fullName = [data.user.secondName, data.user.name, data.user.patronymic]
+                    .filter(Boolean)
+                    .join(' ');
+                studentInfo.textContent = `Решение студента: ${fullName || 'Неизвестный студент'}`;
+                studentInfo.style.display = 'block';
+            }
+        }
+
+        return {
+            id: data.task.id,
+            problem: data.task.problem,
+            userSolution: data.task.userSolution,
+            userPath: data.task.userPath,
+            isSolved: data.task.isSolved,
+            date: data.task.date
+        };
+    } else {
+        url = `${apiHost}/AB/Test`;
+        if (taskId) {
+            url += `?taskId=${taskId}`;
+        }
+
+        response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка при получении задачи: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
     }
-
-    return await response.json();
 }
 
-function setupEventListeners(taskData) {
-    document.getElementById('submit-solution').addEventListener('click', async function() {
-        const userSolution = collectSolution();
-        const messageElement = document.getElementById('solution-message');
-        try {
-            const response = await submitSolution(userSolution);
-            const checkResult = checkSolution(userSolution, response);
-            console.log('Решение пользователя:', userSolution);
-            console.log('Результат проверки:', checkResult);
-            messageElement.style.display = 'block';
-            messageElement.innerHTML = '';
-            if (checkResult.isCorrect) {
-                messageElement.classList.remove('error');
-                messageElement.classList.add('success');
-                messageElement.innerHTML = 'Все минимаксные значения, узлы, путь и отсечения выполнены правильно!';
-            } else {
+function setupEventListeners(taskData, isViewMode = false) {
+    if (!isViewMode) {
+        document.getElementById('submit-solution').addEventListener('click', async function() {
+            const userSolution = collectSolution();
+            const messageElement = document.getElementById('solution-message');
+            try {
+                const response = await submitSolution(userSolution);
+                const checkResult = checkSolution(userSolution, response);
+                console.log('Решение пользователя:', userSolution);
+                console.log('Результат проверки:', checkResult);
+                messageElement.style.display = 'block';
+                messageElement.innerHTML = '';
+                if (checkResult.isCorrect) {
+                    messageElement.classList.remove('error');
+                    messageElement.classList.add('success');
+                    messageElement.innerHTML = 'Все значения α и β, узлы, путь и отсечения выполнены правильно!';
+                } else {
+                    messageElement.classList.remove('success');
+                    messageElement.classList.add('error');
+                    const valueErrors = checkResult.errors.filter(e => e.errorType === 'incorrect_value').length;
+                    const extraNodeErrors = checkResult.errors.filter(e => e.errorType === 'extra_node').length;
+                    const missingNodeErrors = checkResult.errors.filter(e => e.errorType === 'missing_node').length;
+                    const incorrectlyPrunedErrors = checkResult.errors.filter(e => e.errorType === 'incorrectly_pruned').length;
+                    const pathNotSelectedErrors = checkResult.errors.filter(e => e.errorType === 'path_not_selected').length;
+                    const incorrectPathErrors = checkResult.errors.filter(e => e.errorType === 'incorrect_path').length;
+                    let message = 'Найдены ошибки:';
+                    message += '<ul>';
+                    if (valueErrors > 0) {
+                        message += `<li>Неверные минимаксные значения в ${valueErrors} узлах.</li>`;
+                    }
+                    if (extraNodeErrors > 0 || missingNodeErrors > 0) {
+                        message += `<li>Ошибка в отсечении ${extraNodeErrors + missingNodeErrors} узлов.</li>`;
+                    }
+                    if (pathNotSelectedErrors > 0 || incorrectPathErrors > 0) {
+                        message += `<li>Ошибка в выборе правильного пути.</li>`;
+                    }
+                    message += '</ul>';
+                    messageElement.innerHTML = message;
+                }
+            } catch (error) {
+                console.error('Ошибка отправки решения:', error);
+                messageElement.style.display = 'block';
                 messageElement.classList.remove('success');
                 messageElement.classList.add('error');
-                const valueErrors = checkResult.errors.filter(e => e.errorType === 'incorrect_value').length;
-                const extraNodeErrors = checkResult.errors.filter(e => e.errorType === 'extra_node').length;
-                const missingNodeErrors = checkResult.errors.filter(e => e.errorType === 'missing_node').length;
-                const incorrectlyPrunedErrors = checkResult.errors.filter(e => e.errorType === 'incorrectly_pruned').length;
-                const pathNotSelectedErrors = checkResult.errors.filter(e => e.errorType === 'path_not_selected').length;
-                const incorrectPathErrors = checkResult.errors.filter(e => e.errorType === 'incorrect_path').length;
-                let message = 'Найдены ошибки:';
-                message += '<ul>';
-                if (valueErrors > 0) {
-                    message += `<li>Ошибка в определении минимаксных значений в ${valueErrors} узлах.</li>`;
-                }
-                if (extraNodeErrors > 0 || missingNodeErrors > 0) {
-                    message += `<li>Ошибка в отсечении ${extraNodeErrors + missingNodeErrors} узлов.</li>`;
-                }
-                if (pathNotSelectedErrors > 0 || incorrectPathErrors > 0) {
-                    message += `<li>Ошибка в выборе правильного пути.</li>`;
-                }
-                message += '</ul>';
-                messageElement.innerHTML = message;
+                messageElement.innerHTML = `Не удалось проверить решение: ${error.message}`;
             }
-        } catch (error) {
-            console.error('Ошибка отправки решения:', error);
-            messageElement.style.display = 'block';
-            messageElement.classList.remove('success');
-            messageElement.classList.add('error');
-            messageElement.innerHTML = `Не удалось проверить решение: ${error.message}`;
-        }
-    });    
-    document.getElementById('profile-tooltip__button-logout').addEventListener('click', function(e) {
-        e.preventDefault();
-        Logout();
-    });
+        });
 
     document.querySelector('.section-tasksolve__task-display').addEventListener('click', function(e) {
         if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
@@ -301,7 +366,7 @@ function checkSolution(userSolution, correctSolution) {
     const solutionMap = new Map(correctSolution.nodes.map(node => [node.id, node]));
     const correctPath = new Set(correctSolution.path);
     const correctNodeIds = new Set(correctSolution.nodes.map(node => node.id));
-    const userNodeIds = new Set(userSolution.nodes.map(node => node.id));
+    const userNodeIds = new Set(userSolution.nodes.map(node => n.id));
     const userPath = new Set(userSolution.path);
     
     const redBranchIds = new Set();
@@ -465,7 +530,7 @@ function checkSolution(userSolution, correctSolution) {
     };
 }
 
-function renderTree(node, parentContainer = null, level = 0) {
+function renderTree(node, parentContainer = null, level = 0, userSolution = null, userPath = null, isSolved = false) {
     const container = parentContainer || document.getElementById('tree-container');
     if (!parentContainer) container.innerHTML = '';
 
@@ -480,9 +545,16 @@ function renderTree(node, parentContainer = null, level = 0) {
         nodeElement.textContent = node.a;
         nodeElement.classList.add('leaf-node');
     } else {
+        let inputValue = '';
+        if (isSolved && userSolution) {
+            const userNode = userSolution.find(n => n.id === node.id);
+            if (userNode) {
+                inputValue = node.id === 0 ? userNode.a : userNode.b;
+            }
+        }
         nodeElement.innerHTML = `
             <div class="node-input">
-                <input type="text" data-node-id="${node.id}" value="" placeholder="${node.id === 0 ? '' : ''}">
+                <input type="text" data-node-id="${node.id}" value="${inputValue}" placeholder="${node.id === 0 ? '' : ''}">
             </div>
         `;
     }
@@ -510,12 +582,29 @@ function renderTree(node, parentContainer = null, level = 0) {
         const totalWidth = childCount * nodeWidth;
         const spacing = childCount === 1 ? 0 : totalWidth / childCount; 
         
+        const userNodeIds = isSolved && userSolution ? new Set(userSolution.map(n => n.id)) : new Set();
+        const userPathSet = isSolved && userPath ? new Set(userPath) : new Set();
+
+        console.log(`Rendering node ${node.id} at level ${level}, userPath:`, userPath, 'userNodeIds:', Array.from(userNodeIds));
+
         node.subNodes.forEach((childNode, index) => {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.classList.add('branch-line');
             line.dataset.parentId = node.id;
             line.dataset.childId = childNode.id;
-            line.setAttribute('stroke', '#808080');
+            
+            let strokeColor = '#808080';
+            if (isSolved && userPath && userSolution) {
+                if (userPathSet.has(childNode.id)) {
+                    strokeColor = '#4CAF50';
+                } else if (!userNodeIds.has(childNode.id)) {
+                    strokeColor = '#f44336';
+                }
+            }
+
+            console.log(`Branch ${node.id} -> ${childNode.id}: color=${strokeColor}, inPath=${userPathSet.has(childNode.id)}, inSolution=${userNodeIds.has(childNode.id)}`);
+
+            line.setAttribute('stroke', strokeColor);
             line.setAttribute('stroke-width', '4');
             line.style.cursor = 'pointer';
             
@@ -543,7 +632,7 @@ function renderTree(node, parentContainer = null, level = 0) {
             
             svg.appendChild(line);
             svg.appendChild(hitArea);
-            renderTree(childNode, childrenContainer, level + 1);
+            renderTree(childNode, childrenContainer, level + 1, userSolution, userPath, isSolved);
         });
     }
 }
@@ -564,7 +653,7 @@ function collectSolution() {
     });
     
     if (emptyNodes.length > 0) {
-        alert(`Пожалуйста, введите минимаксные значения для всех узлов.`);
+        alert(`Пожалуйста, введите значения для узлов: ${emptyNodes.join(', ')}.`);
         throw new Error('Не все узлы заполнены');
     }
     
