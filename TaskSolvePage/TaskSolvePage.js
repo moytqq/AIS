@@ -154,7 +154,7 @@ function setupEventListeners(taskData, isViewMode = false) {
                     let message = 'Найдены ошибки:';
                     message += '<ul>';
                     if (valueErrors > 0) {
-                        message += `<li>Неверные минимаксные значения в ${valueErrors} узлах.</li>`;
+                        message += `<li>Ошибка в определении минимаксных значений в ${valueErrors} узлах.</li>`;
                     }
                     if (extraNodeErrors > 0 || missingNodeErrors > 0) {
                         message += `<li>Ошибка в отсечении ${extraNodeErrors + missingNodeErrors} узлов.</li>`;
@@ -400,7 +400,7 @@ function checkSolution(userSolution, correctSolution) {
     const solutionMap = new Map(correctSolution.nodes.map(node => [node.id, node]));
     const correctPath = new Set(correctSolution.path);
     const correctNodeIds = new Set(correctSolution.nodes.map(node => node.id));
-    const userNodeIds = new Set(userSolution.nodes.map(node => n.id));
+    const userNodeIds = new Set(userSolution.nodes.map(node => node.id));
     const userPath = new Set(userSolution.path);
     
     const redBranchIds = new Set();
@@ -707,20 +707,30 @@ function collectSolution() {
     };
     
     const emptyNodes = [];
+    const invalidNodes = [];
     document.querySelectorAll('.tree-node:not(.leaf-node)').forEach(nodeElement => {
         const nodeId = parseInt(nodeElement.dataset.nodeId);
         const input = nodeElement.querySelector('.node-input input');
         if (!input || input.value.trim() === '') {
             emptyNodes.push(nodeId);
+        }else {
+            const value = input.value.trim();
+            const num = parseInt(value);
+            if (isNaN(num) || num.toString() !== value) {
+                invalidNodes.push(nodeId);
+            }
         }
     });
     
     if (emptyNodes.length > 0) {
-        alert(`Пожалуйста, введите значения для узлов: ${emptyNodes.join(', ')}.`);
-        alert(`Пожалуйста, введите значения для узлов: ${emptyNodes.join(', ')}.`);
+        alert(`Пожалуйста, введите значения для всех узлов`);
         throw new Error('Не все узлы заполнены');
     }
     
+    if (invalidNodes.length > 0) {
+        alert(`Узлы могу содержать только целые числа`);
+        throw new Error('Введены нецелые числа');
+    }
     const redBranchChildIds = new Set();
     document.querySelectorAll('.branch-line').forEach(line => {
         const childId = parseInt(line.dataset.childId);

@@ -93,26 +93,24 @@ function generatePassword(length = 8) {
 
     return password;
 }
-async function checkIfUserExists() {
+async function checkIfUserExists(userId) {
+    if (!userId) return false;
+
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users/${document.getElementById('id_userId').value}`, {
+        const response = await fetch(`${apiHost}/Users/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        if (response.status === 200)
-        {
-            return true;
-        }
-        return false;
+        return response.status === 200;
     } catch (error) {
+        console.error('Ошибка проверки существования пользователя:', error);
         return false;
     }
 }
-
 async function checkIfGroupExists(groupName) {
     const groups = await fetchGroups();
     return groups.some(group => group.name === groupName);
@@ -149,35 +147,35 @@ document.getElementById('id_button_generate_login_password').addEventListener('c
 document.getElementById('id_button_admin_save').addEventListener('click', async e => {
     e.preventDefault();
 
-    const from_register_user = document.getElementById('id_form_register_user')
+    const from_register_user = document.getElementById('id_form_register_user');
     const from_register_user_styles = window.getComputedStyle(from_register_user);
-    let id_groupId = document.getElementById('id_groupId').value
-    if (from_register_user_styles.display != 'none') {
-        const SplittedFullName = splitFullName(document.getElementById('id_userFullName').value, " ")
+    const id_groupId = document.getElementById('id_groupId').value;
+    const userId = document.getElementById('id_userId').value;
+
+    if (from_register_user_styles.display !== 'none') {
+        const SplittedFullName = splitFullName(document.getElementById('id_userFullName').value, " ");
 
         const data = {
-            userId: document.getElementById('id_userId').value,
+            userId: userId,
             userName: document.getElementById('id_userName').value,
             password: document.getElementById('id_userPassword').value,
-            name: SplittedFullName[1],
-            secondName: SplittedFullName[0],
+            name: SplittedFullName[1] || "",
+            secondName: SplittedFullName[0] || "",
             patronymic: SplittedFullName[2] || "-",
             groupId: id_groupId
-        }
+        };
 
-
-        if (await checkIfUserExists()) {
+        if (await checkIfUserExists(userId)) {
+            putUser(data);
             document.getElementById('id_userId').value = '';
             document.getElementById('id_groupId').value = '';
-            putUser(data);
-        }
-        else {
-            document.getElementById('id_groupId').value = '';
+        } else {
+            delete data.userId;
             addUser(data);
+            document.getElementById('id_userId').value = '';
+            document.getElementById('id_groupId').value = '';
         }
-
-    }
-    else {
+    } else {
         const groupName = document.getElementById('id_groupName').value.trim();
         if (!groupName) {
             alert('Введите название группы');
@@ -192,8 +190,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
         const data = { groupName };
         addGroup(data);
     }
-
-})
+});
 
 async function addUser(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
@@ -451,58 +448,63 @@ async function setupGroupDropdowns() {
 }
 
 function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
-    
-    const existingDropdown = button.nextElementSibling;
-
-    if (existingDropdown && existingDropdown.classList.contains('group-dropdown')) {
-        existingDropdown.remove();
-        return;
-        }
+    // Remove any existing dropdowns
     document.querySelectorAll('.group-dropdown').forEach(d => d.remove());
-    
+
+    // If the dropdown was just closed, don't create a new one
+    if (button.classList.contains('dropdown-open')) {
+        button.classList.remove('dropdown-open');
+        return;
+    }
+
+    // Mark button as open
+    button.classList.add('dropdown-open');
+
     const dropdown = document.createElement('div');
     dropdown.className = 'group-dropdown';
-    
-    button.parentNode.insertBefore(dropdown, button.nextSibling);
 
+    // Populate dropdown with group items
     groups.forEach(group => {
         const item = document.createElement('div');
         item.className = 'group-dropdown-item';
         item.textContent = group.name;
-        
+
         item.addEventListener('click', () => {
             document.getElementById(inputNameId).value = group.name;
             if (inputGroupId && document.getElementById(inputGroupId)) {
                 document.getElementById(inputGroupId).value = group.id;
             }
             dropdown.remove();
+            button.classList.remove('dropdown-open');
         });
-        
+
         dropdown.appendChild(item);
     });
 
+    button.parentNode.appendChild(dropdown);
+
     const rect = button.getBoundingClientRect();
     const parentRect = button.parentNode.getBoundingClientRect();
-    
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
     Object.assign(dropdown.style, {
         position: 'absolute',
-        top: `${rect.bottom - parentRect.top}px`,
+        top: `${rect.bottom - parentRect.top + scrollTop + 20}px`,
         left: `${rect.left - parentRect.left}px`,
-        zIndex: 1000,
-        width: `${rect.width}px`
+        zIndex: '1000',
+        minWidth: `${rect.width}px`
     });
-    
+
     const closeHandler = (e) => {
         if (!dropdown.contains(e.target) && e.target !== button) {
             dropdown.remove();
+            button.classList.remove('dropdown-open');
             document.removeEventListener('click', closeHandler);
         }
     };
-    
-    setTimeout(() => document.addEventListener('click', closeHandler), 0);
-}
 
-function setupGroupButtons() {
+    setTimeout(() => document.addEventListener('click', closeHandler), 0);
+}function setupGroupButtons() {
     document.querySelector('.profile-tooltip__button-add-group')?.addEventListener('click', async function(e) {
         e.preventDefault();
         const groupNameInput = document.getElementById('id_groupName-of-user');
