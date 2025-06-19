@@ -102,6 +102,8 @@ function populateTasksTable(tasks) {
         
         console.log(`Рендеринг строки: Task ID: ${task.id || 'unknown'}, User ID: ${userId}, User Name: ${shortName}`);
         
+        const viewButton = task.isSolved ? `<button class="button-view" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Посмотреть решение"></button>` : '';
+        
         tr.innerHTML = `
             <td>α & β отсечение</td>
             <td>${shortName}</td>
@@ -111,6 +113,7 @@ function populateTasksTable(tasks) {
             <td class="actions-cell">
                 <button class="button-edit" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Редактировать"></button>
                 <button class="button-delete" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Удалить"></button>
+                ${viewButton}
             </td>
         `;
         
@@ -123,6 +126,9 @@ function populateTasksTable(tasks) {
     document.querySelectorAll('.button-edit').forEach(button => {
         button.addEventListener('click', handleEditTask);
     }); 
+    document.querySelectorAll('.button-view').forEach(button => {
+        button.addEventListener('click', handleViewSolution);
+    });
 }
 
 async function handleDeleteTask(e) {
@@ -168,8 +174,17 @@ function handleEditTask(e) {
     window.location.href = `/TaskEditPage/TaskEditPage.html?userId=${userId}&userName=${encodeURIComponent(userName)}&userGroup=${encodeURIComponent(userGroup)}&taskId=${taskId}`;
 }
 
+function handleViewSolution(e) {
+    const button = e.currentTarget;
+    const taskId = button.dataset.taskId;
+    const userId = button.dataset.userId;
+    
+    console.log(`Просмотр решения: Task ID: ${taskId}, User ID: ${userId}`);
+    window.location.href = `/TaskSolvePage/TaskSolvePage.html?view=true&taskId=${taskId}&userId=${userId}`;
+}
+
 function formatShortName(fullName) {
-    if (!fullName) return 'Неизвестный пользователь';
+    if (!fullName) return 'Без имени';
     
     const parts = fullName.split(' ').filter(Boolean);
     

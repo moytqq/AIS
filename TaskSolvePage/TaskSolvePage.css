@@ -453,3 +453,7 @@
     padding-left: 2em; 
     margin: 0;
 }
+.student-info{
+    display: block;
+    font-size: 24px;
+}
