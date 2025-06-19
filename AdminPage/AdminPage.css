@@ -1,4 +1,3 @@
-/* AdminPage.css */
 .main-wrapper {
     background-color: #FFFAFA;
     color: #000000;
@@ -12,14 +11,14 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    font-size: clamp(16px, 2vw, 24px); /* Адаптивный размер шрифта */
+    font-size: clamp(16px, 2vw, 24px);
 }
 
 .main-wrapper__section-admin-edit {
     margin: 0 clamp(15px, 10%, 135px) 10px;
     padding-top: 25px;
-    width: -moz-available; /* Firefox */
-    width: -webkit-fill-available; /* Chrome */
+    width: -moz-available;
+    width: -webkit-fill-available;
     width: fill-available;
     height: auto;
 }
@@ -31,8 +30,8 @@
 }
 
 .admin__tabs {
-    position: relative; /* Добавляем относительное позиционирование */
-    min-height: 160px; /* Уменьшаем минимальную высоту */
+    position: relative;
+    min-height: 160px;
 }
 
 .tabs__tab, .tabs__title {
@@ -68,9 +67,9 @@
 
 .tabs__content {
     position: absolute;
-    top: 17%; /* Позиционируем контент под заголовками вкладок */
+    top: 17%;
     left: 0;
-    margin-top: 1px; /* Чтобы контент плотно прилегал к заголовку */
+    margin-top: 1px;
     border: 1px solid #7F7C7C;
     padding: 10px;
     left: 0;
@@ -133,7 +132,6 @@ input {
     display: none;
 }
 
-/* Кнопки */
 .form-register__button-generate,
 .admin-list__button-edit,
 .admin-list__button-delete,
@@ -173,8 +171,8 @@ input {
 }
 
 .admin-form__submit-button {
-    position: relative; /* Делаем позиционирование относительным */
-    z-index: 5; /* Поднимаем кнопку над другими элементами */
+    position: relative;
+    z-index: 5;
     width: clamp(100px, 15vw, 150px);
     height: clamp(30px, 5vw, 35px);
     background-color: #212529;
@@ -185,7 +183,6 @@ input {
     cursor: pointer;
 }
 
-/* Секция списка администратора */
 .main-wrapper__section-admin-list {
     display: flex;
     width: -moz-available;
@@ -292,7 +289,6 @@ input {
     border-radius: 0 0 10px 0;
 }
 
-/* Адаптивные стили */
 @media (max-width: 768px) {
     .admin__tabs {
         min-height: auto;

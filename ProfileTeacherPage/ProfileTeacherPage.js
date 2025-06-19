@@ -1,33 +1,41 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     fetchAssignedTasks();
 });
 
-
 document.getElementById('profile-tooltip__button-logout').addEventListener('click', e => {
     e.preventDefault();
-
     Logout();
-})
+});
 
 async function Logout() {
-    const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const res = await fetch(`${apiHost}/Users/Logout`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${authtoken}`
+    try {
+        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const res = await fetch(`${apiHost}/Users/Logout`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+        if (res.status === 200) {
+            window.location.href = "/LoginPage/LoginPage.html";
+        } else {
+            console.error('Ошибка выхода:', res.status, res.statusText);
+            alert('Не удалось выйти из системы');
         }
-    });
-
-    if (res.status === 200) {
-        window.location.href = "/LoginPage/LoginPage.html";
+    } catch (error) {
+        console.error('Ошибка при выходе:', error);
+        alert('Произошла ошибка при выходе');
     }
 }
 
 async function fetchAssignedTasks() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        if (!authtoken) {
+            throw new Error('Токен авторизации отсутствует');
+        }
         
-        // Получаем список заданий
+        console.log('Отправка запроса к API:', `${apiHost}/AB/Users/`);
         const tasksResponse = await fetch(`${apiHost}/AB/Users/`, {
             method: 'GET',
             headers: {
@@ -37,57 +45,78 @@ async function fetchAssignedTasks() {
         });
         
         if (!tasksResponse.ok) {
-            throw new Error('Ошибка при получении заданий');
+            throw new Error(`Ошибка HTTP: ${tasksResponse.status} ${tasksResponse.statusText}`);
         }
         
         const tasks = await tasksResponse.json();
+        console.log('Ответ API:', tasks);
         
-        const tasksWithUserInfo = await Promise.all(
-            tasks.map(async assignment => {               
-                const user = assignment.user;
+        if (!Array.isArray(tasks)) {
+            throw new Error('Ответ API не является массивом заданий');
+        }
+        
+        const tasksWithUserInfo = tasks.map(assignment => {
+            if (!assignment.user || !assignment.user.id || !assignment.task) {
+                console.warn('Некорректная структура задания:', assignment);
                 return {
-                    ...assignment.task,
-                    userName: [user.secondName, user.name, user.patronymic].join(' '),
-                    group: user.group
+                    ...assignment.task || {},
+                    userId: 'unknown',
+                    userName: 'Неизвестный пользователь',
+                    group: '----------'
                 };
-            })
-        );
+            }
+            const user = assignment.user;
+            return {
+                ...assignment.task,
+                userId: user.id,
+                userName: [user.secondName, user.name, user.patronymic].filter(Boolean).join(' '),
+                group: user.group || '----------'
+            };
+        });
         
+        console.log('Преобразованные данные:', tasksWithUserInfo);
         populateTasksTable(tasksWithUserInfo);
     } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при загрузке заданий');
+        console.error('Ошибка в fetchAssignedTasks:', error.message, error.stack);
+        alert(`Произошла ошибка при загрузке заданий: ${error.message}`);
     }
 }
 
 function populateTasksTable(tasks) {
     const tableBody = document.querySelector('.given-tasks-table__table tbody');
+    if (!tableBody) {
+        console.error('Элемент tbody не найден');
+        return;
+    }
     tableBody.innerHTML = '';
 
     tasks.forEach(task => {
         const tr = document.createElement('tr');
         tr.style.whiteSpace = 'nowrap';
         
-        const date = new Date(task.date);
+        const date = new Date(task.date || Date.now());
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
         const shortName = formatShortName(task.userName);
         const status = task.isSolved ? 'Выполнено' : 'Выдано';
-        const group = task.group || '----------';
+        const userId = task.userId || 'unknown';
+        
+        console.log(`Рендеринг строки: Task ID: ${task.id || 'unknown'}, User ID: ${userId}, User Name: ${shortName}`);
         
         tr.innerHTML = `
             <td>α & β отсечение</td>
             <td>${shortName}</td>
-            <td>${group}</td>
+            <td>${task.group}</td>
             <td>${formattedDate}</td>
             <td>${status}</td>
             <td class="actions-cell">
-                <button class="button-edit" data-task-id="${task.id}" data-user-id="${task.userId}" title="Редактировать"></button>
-                <button class="button-delete" data-task-id="${task.id}" data-user-id="${task.userId}" title="Удалить"></button>
+                <button class="button-edit" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Редактировать"></button>
+                <button class="button-delete" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Удалить"></button>
             </td>
         `;
         
         tableBody.appendChild(tr);
     });
+
     document.querySelectorAll('.button-delete').forEach(button => {
         button.addEventListener('click', handleDeleteTask);
     }); 
@@ -107,6 +136,7 @@ async function handleDeleteTask(e) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        console.log(`Удаление задания: Task ID: ${taskId}, User ID: ${userId}`);
         const response = await fetch(`${apiHost}/AB/Users/${userId}`, {
             method: 'DELETE',
             headers: {
@@ -119,13 +149,14 @@ async function handleDeleteTask(e) {
             alert('Задание успешно удалено');
             button.closest('tr').remove();
         } else {
-            throw new Error('Ошибка при удалении задания');
+            throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
         }
     } catch (error) {
-        console.error('Ошибка:', error);
+        console.error('Ошибка при удалении:', error);
         alert('Не удалось удалить задание');
     }
 }
+
 function handleEditTask(e) {
     const button = e.currentTarget;
     const taskId = button.dataset.taskId;
@@ -133,8 +164,10 @@ function handleEditTask(e) {
     const userName = button.closest('tr').querySelector('td:nth-child(2)').textContent;
     const userGroup = button.closest('tr').querySelector('td:nth-child(3)').textContent;
     
+    console.log(`Редактирование: Task ID: ${taskId}, User ID: ${userId}, User Name: ${userName}`);
     window.location.href = `/TaskEditPage/TaskEditPage.html?userId=${userId}&userName=${encodeURIComponent(userName)}&userGroup=${encodeURIComponent(userGroup)}&taskId=${taskId}`;
 }
+
 function formatShortName(fullName) {
     if (!fullName) return 'Неизвестный пользователь';
     

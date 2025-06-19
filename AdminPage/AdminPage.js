@@ -15,7 +15,6 @@ function joinFullName(data) {
     });
 }
 function generateLogin(fullName) {
-    // 1. Транслитерация с русского на английский
     const translitRules = {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
         'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o',
@@ -29,17 +28,14 @@ function generateLogin(fullName) {
         'Я': 'Ya'
     };
 
-    // Транслитерируем ФИО
     let transliterated = '';
     for (const char of fullName) {
         transliterated += translitRules[char] || char;
     }
 
-    // 2. Формируем базовый логин (фамилия + первые буквы имени и отчества)
     const [lastName, firstName, middleName] = transliterated.split(' ').filter(Boolean);
     let baseLogin = '';
 
-    // Вариант 1: IvanovPS (фамилия + первые буквы имени и отчества)
     if (lastName && firstName && middleName) {
         baseLogin = (
             lastName.toLowerCase() +
@@ -47,32 +43,26 @@ function generateLogin(fullName) {
             middleName[0].toLowerCase()
         );
     }
-    // Вариант 2: Pyotr.Sergeevich (имя.отчество)
     else if (firstName && middleName) {
         baseLogin = (
             firstName.toLowerCase() + '.' + middleName.toLowerCase()
         );
     }
-    // Если только фамилия и имя
     else if (lastName && firstName) {
         baseLogin = (
             lastName.toLowerCase() + firstName[0].toLowerCase()
         );
     }
-    // Если только фамилия
     else if (lastName) {
         baseLogin = lastName.toLowerCase();
     }
-    // Если что-то пошло не так, используем user + случайное число
     else {
         baseLogin = 'user' + Math.floor(Math.random() * 100);
     }
 
-    // 3. Добавляем случайную цифру (0-9)
     const randomDigit = Math.floor(Math.random() * 10);
     baseLogin += randomDigit;
 
-    // 4. Добавляем случайный спецсимвол
     const specialChars = '!@#$%^&*';
     const randomSpecialChar = specialChars[Math.floor(Math.random() * specialChars.length)];
     baseLogin += randomSpecialChar;
@@ -220,7 +210,6 @@ async function addUser(data) {
         alert('Пользователь добавлен')
         fetchDBData();
     }
-    // const result = await res.json();
 }
 
 async function addGroup(groupName) {

@@ -4,8 +4,6 @@ document.getElementById('form_login').addEventListener('submit', e => {
     const data = {
         userName: document.getElementById('id_userLogin').value,
         password: document.getElementById('id_userPassword').value,
-        // twoFactorCode: "",
-        // twoFactorRecoveryCode: ""
     }
     
     sendLoginForm(data);

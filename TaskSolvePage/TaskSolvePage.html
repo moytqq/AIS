@@ -36,21 +36,20 @@
   <main class="main-wrapper">
     <section class="main-wrapper__section-tasksolve">
       <div class="section-tasksolve__taskinfo">
-        <span class="section-tasksolve__task-name">α & β отсечение</span>
-        <span class="section-tasksolve__task-description">Заполните значения α и β для каждого узла дерева</span>
+        <span class="section-tasksolve__task-name">min-max алгоритм и α-β отсечение</span>
+        <span class="section-tasksolve__task-description">Заполните минимаксные значения, выберите правильный путь и отсекаемые узлы:</span>
+        <span class="section-tasksolve__task-description">Порядок смены состояний веток: ЛКМ - красный, отсечение; ПКМ - зеленый, правильный путь; ЛКМ/ПКМ - серый.</span>
       </div>
     <form class="section-tasksolve__task-display">
         <div class="section-tasksolve__task-graphics" id="tree-container">
           
         </div>
-        <div class="section-tasksolve__task-info">
-          <div class="section-tasksolve__task-info-details">              
-            <span class="tabs__input-span">Заполните все доступные узлы</span>
-          </div>
-          <button type="button" class="tasksolve-form__submit-button" id="submit-solution">Готово</button>
-        </div>
     </form>
     </section>
+    <div class="section-tasksolve__task-info">
+      <button type="button" class="tasksolve-form__submit-button" id="submit-solution">Готово</button>
+      <div id="solution-message"></div>
+    </div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
   <script src="/TaskSolvePage/TaskSolvePage.js"></script>
