@@ -148,7 +148,7 @@
 .section-tasksolve__task-display{
     margin-top: 35px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 30px;
 }
 .section-tasksolve__task-graphics{
