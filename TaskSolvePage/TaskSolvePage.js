@@ -6,10 +6,34 @@ document.addEventListener('DOMContentLoaded', async function() {
         const userId = urlParams.get('userId');
 
         const taskData = await fetchTaskData(taskId, userId, isViewMode);
+        const urlParams = new URLSearchParams(window.location.search);
+        const isViewMode = urlParams.get('view') === 'true';
+        const taskId = urlParams.get('taskId');
+        const userId = urlParams.get('userId');
+
+        const taskData = await fetchTaskData(taskId, userId, isViewMode);
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
             window.location.href = isViewMode ? "/ProfileTeacherPage/ProfileTeacherPage.html" : "/ProfileStudentPage/ProfileStudentPage.html";
+            window.location.href = isViewMode ? "/ProfileTeacherPage/ProfileTeacherPage.html" : "/ProfileStudentPage/ProfileStudentPage.html";
             return;
+        }
+
+        renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
+        setupEventListeners(taskData, isViewMode);
+
+        if (isViewMode) {
+            document.querySelectorAll('.node-input input').forEach(input => {
+                input.disabled = true;
+            });
+            const submitButton = document.getElementById('submit-solution');
+            if (submitButton) {
+                submitButton.style.display = 'none';
+            }
+            const solutionMessage = document.getElementById('solution-message');
+            if (solutionMessage) {
+                solutionMessage.style.display = 'none';
+            }
         }
 
         renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
@@ -32,9 +56,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Ошибка загрузки задачи:', error);
         alert('Не удалось загрузить задачу');
         window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
     }
 });
 
+async function fetchTaskData(taskId, userId, isViewMode) {
 async function fetchTaskData(taskId, userId, isViewMode) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     let url;
@@ -374,7 +400,7 @@ function checkSolution(userSolution, correctSolution) {
     const solutionMap = new Map(correctSolution.nodes.map(node => [node.id, node]));
     const correctPath = new Set(correctSolution.path);
     const correctNodeIds = new Set(correctSolution.nodes.map(node => node.id));
-    const userNodeIds = new Set(userSolution.nodes.map(node => node.id));
+    const userNodeIds = new Set(userSolution.nodes.map(node => n.id));
     const userPath = new Set(userSolution.path);
     
     const redBranchIds = new Set();
@@ -539,6 +565,7 @@ function checkSolution(userSolution, correctSolution) {
 }
 
 function renderTree(node, parentContainer = null, level = 0, userSolution = null, userPath = null, isSolved = false) {
+function renderTree(node, parentContainer = null, level = 0, userSolution = null, userPath = null, isSolved = false) {
     const container = parentContainer || document.getElementById('tree-container');
     if (!parentContainer) container.innerHTML = '';
 
@@ -560,8 +587,16 @@ function renderTree(node, parentContainer = null, level = 0, userSolution = null
                 inputValue = node.id === 0 ? userNode.a : userNode.b;
             }
         }
+        let inputValue = '';
+        if (isSolved && userSolution) {
+            const userNode = userSolution.find(n => n.id === node.id);
+            if (userNode) {
+                inputValue = node.id === 0 ? userNode.a : userNode.b;
+            }
+        }
         nodeElement.innerHTML = `
             <div class="node-input">
+                <input type="text" data-node-id="${node.id}" value="${inputValue}" placeholder="${node.id === 0 ? '' : ''}">
                 <input type="text" data-node-id="${node.id}" value="${inputValue}" placeholder="${node.id === 0 ? '' : ''}">
             </div>
         `;
@@ -595,11 +630,30 @@ function renderTree(node, parentContainer = null, level = 0, userSolution = null
 
         console.log(`Rendering node ${node.id} at level ${level}, userPath:`, userPath, 'userNodeIds:', Array.from(userNodeIds));
 
+        
+        const userNodeIds = isSolved && userSolution ? new Set(userSolution.map(n => n.id)) : new Set();
+        const userPathSet = isSolved && userPath ? new Set(userPath) : new Set();
+
+        console.log(`Rendering node ${node.id} at level ${level}, userPath:`, userPath, 'userNodeIds:', Array.from(userNodeIds));
+
         node.subNodes.forEach((childNode, index) => {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.classList.add('branch-line');
             line.dataset.parentId = node.id;
             line.dataset.childId = childNode.id;
+            
+            let strokeColor = '#808080';
+            if (isSolved && userPath && userSolution) {
+                if (userPathSet.has(childNode.id)) {
+                    strokeColor = '#4CAF50';
+                } else if (!userNodeIds.has(childNode.id)) {
+                    strokeColor = '#f44336';
+                }
+            }
+
+            console.log(`Branch ${node.id} -> ${childNode.id}: color=${strokeColor}, inPath=${userPathSet.has(childNode.id)}, inSolution=${userNodeIds.has(childNode.id)}`);
+
+            line.setAttribute('stroke', strokeColor);
             
             let strokeColor = '#808080';
             if (isSolved && userPath && userSolution) {
@@ -641,6 +695,7 @@ function renderTree(node, parentContainer = null, level = 0, userSolution = null
             svg.appendChild(line);
             svg.appendChild(hitArea);
             renderTree(childNode, childrenContainer, level + 1, userSolution, userPath, isSolved);
+            renderTree(childNode, childrenContainer, level + 1, userSolution, userPath, isSolved);
         });
     }
 }
@@ -661,6 +716,7 @@ function collectSolution() {
     });
     
     if (emptyNodes.length > 0) {
+        alert(`Пожалуйста, введите значения для узлов: ${emptyNodes.join(', ')}.`);
         alert(`Пожалуйста, введите значения для узлов: ${emptyNodes.join(', ')}.`);
         throw new Error('Не все узлы заполнены');
     }
