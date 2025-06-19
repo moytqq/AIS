@@ -272,7 +272,7 @@ function checkSolution(userSolution, correctSolution) {
     const solutionMap = new Map(correctSolution.nodes.map(node => [node.id, node]));
     const correctPath = new Set(correctSolution.path);
     const correctNodeIds = new Set(correctSolution.nodes.map(node => node.id));
-    const userNodeIds = new Set(userSolution.nodes.map(node => n.id));
+    const userNodeIds = new Set(userSolution.nodes.map(node => node.id));
     const userPath = new Set(userSolution.path);
     
     const redBranchIds = new Set();
