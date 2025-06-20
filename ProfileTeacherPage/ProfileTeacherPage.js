@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    if (!restrictAccess()) return;
+
+    const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
+    document.querySelector('.profile-tooltip_username').textContent = userFullName;
+    document.querySelector('.userinfo__username').textContent = userFullName;
+    document.querySelector('.profile-tooltip_role').textContent = 'Преподаватель';
     fetchAssignedTasks();
 });
 
@@ -17,6 +24,7 @@ async function Logout() {
             }
         });
         if (res.status === 200) {
+            sessionStorage.removeItem('userFullName'); // Clear stored name on logout
             window.location.href = "/LoginPage/LoginPage.html";
         } else {
             console.error('Ошибка выхода:', res.status, res.statusText);
@@ -27,7 +35,6 @@ async function Logout() {
         alert('Произошла ошибка при выходе');
     }
 }
-
 async function fetchAssignedTasks() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');

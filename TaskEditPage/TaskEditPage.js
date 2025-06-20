@@ -11,6 +11,13 @@ let allUsers = [];
 let selectedUserIds = [];
 
 document.addEventListener('DOMContentLoaded', function() {
+
+    if (!restrictAccess()) return;
+
+    const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
+    document.querySelector('.profile-tooltip_username').textContent = userFullName;
+    document.querySelector('.profile-tooltip_role').textContent = 'Преподаватель';
+    
     const urlParams = new URLSearchParams(window.location.search);
     editUserId = urlParams.get('userId');
     const userName = urlParams.get('userName');
@@ -59,10 +66,10 @@ async function Logout() {
     });
 
     if (res.status === 200) {
+        sessionStorage.removeItem('userFullName'); // Clear stored name on logout
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }
-
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');

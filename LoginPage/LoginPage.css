@@ -87,6 +87,21 @@ input {
     background-color: #343a40;
 }
 
+.login-form__error-message {
+    color: #ff0000;
+    font-size: clamp(0.875rem, 3vw, 1rem);
+    text-align: center;
+    width: 100%;
+    margin-top: 0.5rem;
+    display: none;
+}
+.login-form__error-message {
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+.login-form__error-message[style*="display: block"] {
+    opacity: 1;
+}
 @media (max-width: 768px) {
     .main_wrapper {
         width: 95vw;
@@ -103,6 +118,9 @@ input {
 
     input, .login-form__submit-button {
         height: 2.5rem;
+    }
+    .login-form__error-message {
+        font-size: clamp(0.75rem, 2.5vw, 0.875rem);
     }
 }
 
@@ -127,5 +145,9 @@ input {
 
     input, .login-form__submit-button {
         font-size: clamp(0.875rem, 3vw, 1rem);
+    }
+
+    .login-form__error-message {
+        font-size: clamp(0.625rem, 2vw, 0.75rem);
     }
 }
