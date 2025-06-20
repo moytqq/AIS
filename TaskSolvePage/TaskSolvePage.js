@@ -20,11 +20,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     try {
         const urlParams = new URLSearchParams(window.location.search);
-        const isViewMode = urlParams.get('view') === 'true';
         const taskId = urlParams.get('taskId');
-        const userId = urlParams.get('userId');
-
-        const taskData = await fetchTaskData(taskId, userId, isViewMode);
+        var userId = urlParams.get('userId');
+        const taskData = await fetchTaskData(taskId, userId, true);
+        const isViewMode = taskData.isSolved
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
             window.location.href = isViewMode ? "/ProfileTeacherPage/ProfileTeacherPage.html" : "/ProfileStudentPage/ProfileStudentPage.html";
@@ -106,7 +105,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
         console.error('Ошибка загрузки задачи:', error);
         alert('Не удалось загрузить задачу');
-        window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        if (userId) {
+            window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        }
+        else {
+            window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+        }
     }
 });
 
@@ -152,7 +156,7 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             userPath: data.task.userPath,
             isSolved: data.task.isSolved,
             date: data.task.date,
-            correctSolution: data.task.correctSolution || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
+            correctSolution: { nodes: data.task.solution, path: data.task.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
         };
     } else {
         url = `${apiHost}/AB/Test`;
@@ -172,7 +176,20 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             throw new Error(`Ошибка при получении задачи: ${response.status} ${response.statusText}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        if (!data.problem) {
+            throw new Error('Данные задачи отсутствуют в ответе');
+        }
+
+        return {
+            id: data.id,
+            problem: data.problem,
+            userSolution: data.userSolution,
+            userPath: data.userPath,
+            isSolved: data.isSolved,
+            date: data.date,
+            correctSolution: { nodes: data.solution, path: data.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
+        };
     }
 }
 
@@ -607,6 +624,15 @@ function checkSolution(userSolution, correctSolution) {
             }
         }
     });
+
+    greenBranchIds.forEach(id => {
+        if (!correctPath.has(id)) {
+            document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#ffe10d')
+        }
+    })
+    correctPath.forEach(id => {
+        document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#4CAF50')
+    })
     
     return {
         isCorrect: errors.length === 0,
