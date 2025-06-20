@@ -26,7 +26,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         const isViewMode = taskData.isSolved
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
-            window.location.href = isViewMode ? "/ProfileTeacherPage/ProfileTeacherPage.html" : "/ProfileStudentPage/ProfileStudentPage.html";
+            if (userId) {
+                window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+            }
+            else {
+                window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+            }
             return;
         }
 
