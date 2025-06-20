@@ -27,6 +27,62 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (solutionMessage) {
                 solutionMessage.style.display = 'none';
             }
+            if (taskData.userSolution && taskData.userPath && taskData.correctSolution) {
+                try {
+                    const checkResult = checkSolution({
+                        nodes: taskData.userSolution,
+                        path: taskData.userPath
+                    }, taskData.correctSolution);
+                    console.log('Решение студента:', taskData.userSolution, taskData.userPath);
+                    console.log('Результат проверки:', checkResult);
+
+                    if (solutionMessage) {
+                        solutionMessage.innerHTML = '';
+                        if (checkResult.isCorrect) {
+                            solutionMessage.classList.remove('error');
+                            solutionMessage.classList.add('success');
+                            solutionMessage.innerHTML = 'Все значения α и β, узлы, путь и отсечения выполнены правильно!';
+                        } else {
+                            solutionMessage.classList.remove('success');
+                            solutionMessage.classList.add('error');
+                            const valueErrors = checkResult.errors.filter(e => e.errorType === 'incorrect_value').length;
+                            const extraNodeErrors = checkResult.errors.filter(e => e.errorType === 'extra_node').length;
+                            const missingNodeErrors = checkResult.errors.filter(e => e.errorType === 'missing_node').length;
+                            const incorrectlyPrunedErrors = checkResult.errors.filter(e => e.errorType === 'incorrectly_pruned').length;
+                            const pathNotSelectedErrors = checkResult.errors.filter(e => e.errorType === 'path_not_selected').length;
+                            const incorrectPathErrors = checkResult.errors.filter(e => e.errorType === 'incorrect_path').length;
+                            let message = 'Найдены ошибки:';
+                            message += '<ul>';
+                            if (valueErrors > 0) {
+                                message += `<li>Ошибка в определении минимаксных значений в ${valueErrors} узлах.</li>`;
+                            }
+                            if (extraNodeErrors > 0 || missingNodeErrors > 0) {
+                                message += `<li>Ошибка в отсечении ${extraNodeErrors + missingNodeErrors} узлов.</li>`;
+                            }
+                            if (pathNotSelectedErrors > 0 || incorrectPathErrors > 0) {
+                                message += `<li>Ошибка в выборе правильного пути.</li>`;
+                            }
+                            message += '</ul>';
+                            solutionMessage.innerHTML = message;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка проверки решения в режиме просмотра:', error);
+                    if (solutionMessage) {
+                        solutionMessage.style.display = 'block';
+                        solutionMessage.classList.remove('success');
+                        solutionMessage.classList.add('error');
+                        solutionMessage.innerHTML = `Не удалось проверить решение: ${error.message}`;
+                    }
+                }
+            } else {
+                if (solutionMessage) {
+                    solutionMessage.style.display = 'block';
+                    solutionMessage.classList.remove('success');
+                    solutionMessage.classList.add('error');
+                    solutionMessage.innerHTML = 'Данные для проверки решения отсутствуют';
+                }
+            }
         }
     } catch (error) {
         console.error('Ошибка загрузки задачи:', error);
@@ -76,7 +132,8 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             userSolution: data.task.userSolution,
             userPath: data.task.userPath,
             isSolved: data.task.isSolved,
-            date: data.task.date
+            date: data.task.date,
+            correctSolution: data.task.correctSolution || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
         };
     } else {
         url = `${apiHost}/AB/Test`;
@@ -554,7 +611,7 @@ function collectSolution() {
     document.querySelectorAll('.tree-node:not(.leaf-node)').forEach(nodeElement => {
         const nodeId = parseInt(nodeElement.dataset.nodeId);
         const input = nodeElement.querySelector('.node-input input');
-        if (!input || input.value.trim() === '') {
+        if (!input || input.value.trim() === '' || input.value <= 0) {
             emptyNodes.push(nodeId);
         }else {
             const value = input.value.trim();
@@ -566,7 +623,7 @@ function collectSolution() {
     });
     
     if (emptyNodes.length > 0) {
-        alert(`Пожалуйста, введите значения для всех узлов`);
+        alert(`Пожалуйста, введите натуральные значения для всех узлов`);
         throw new Error('Не все узлы заполнены');
     }
     
