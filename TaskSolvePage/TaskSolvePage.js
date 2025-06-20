@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelector('.profile-tooltip_username').textContent = userFullName;
     document.querySelector('.profile-tooltip_role').textContent = isTeacher ? 'Преподаватель' : 'Студент';
     
+    const profileLink = document.querySelector('.profile-tooltip_to-profile-href');
+    if (profileLink) {
+        profileLink.href = isTeacher ? '/ProfileTeacherPage/ProfileTeacherPage.html' : '/ProfileStudentPage/ProfileStudentPage.html';
+    }
+
     const adminLink = document.querySelector('.button_settings');
     if (adminLink && !isTeacher) {
         adminLink.style.display = 'none';
@@ -162,6 +167,7 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             isSolved: data.task.isSolved,
             date: data.task.date,
             correctSolution: { nodes: data.task.solution, path: data.task.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
+
         };
     } else {
         url = `${apiHost}/AB/Test`;
