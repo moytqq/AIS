@@ -1,3 +1,15 @@
+document.addEventListener('DOMContentLoaded', function () {
+
+    if (!restrictAccess()) return;
+
+    const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
+    document.querySelector('.profile-tooltip_username').textContent = userFullName;
+    
+    fetchDBData();
+    setupGroupDropdowns().then(() => {
+        setupGroupButtons();
+    });
+});
 function splitFullName(FullName, separator) {
     let SplittedFullName = FullName.split(separator);
     return (SplittedFullName);
@@ -132,6 +144,7 @@ async function Logout() {
     });
 
     if (res.status === 200) {
+        sessionStorage.removeItem('userFullName'); // Clear stored name on logout
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }
@@ -277,13 +290,6 @@ async function deleteGroup(groupId) {
         return false;
     }
 }
-document.addEventListener('DOMContentLoaded', function () {
-    fetchDBData();
-    setupGroupDropdowns().then(() => {
-        setupGroupButtons();
-    });
-});
-
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');

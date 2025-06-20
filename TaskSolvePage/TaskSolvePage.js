@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', async function() {
+    
+    if (!restrictAccess()) return;
+
+    const userFullName = sessionStorage.getItem('userFullName');
+    const isTeacher = sessionStorage.getItem('isTeacher') === 'true' || false;
+
+    if (!userFullName || sessionStorage.getItem('isTeacher') === null) {
+        alert('Пожалуйста, войдите в систему');
+        window.location.href = "/LoginPage/LoginPage.html";
+        return;
+    }
+    document.querySelector('.profile-tooltip_username').textContent = userFullName;
+    document.querySelector('.profile-tooltip_role').textContent = isTeacher ? 'Преподаватель' : 'Студент';
+    
+    const adminLink = document.querySelector('.button_settings');
+    if (adminLink && !isTeacher) {
+        adminLink.style.display = 'none';
+    }
+
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const isViewMode = urlParams.get('view') === 'true';
@@ -711,6 +730,7 @@ async function Logout() {
     });
 
     if (res.status === 200) {
+        sessionStorage.removeItem('userFullName'); // Clear stored name on logout
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }

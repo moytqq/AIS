@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    if (!restrictAccess()) return;
+    
+    const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
+    document.querySelector('.profile-tooltip_username').textContent = userFullName;
+    document.querySelector('.userinfo__username').textContent = userFullName;
+    document.querySelector('.profile-tooltip_role').textContent = 'Студент';
+    
+    const adminLink = document.querySelector('.admin-link, #admin-link');
+    if (adminLink && !isTeacher) {
+        adminLink.style.display = 'none';
+    }
+    
     fetchAssignedTasks();
 });
 
@@ -18,6 +31,7 @@ async function Logout() {
     });
 
     if (res.status === 200) {
+        sessionStorage.removeItem('userFullName'); // Clear stored name on logout
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }
