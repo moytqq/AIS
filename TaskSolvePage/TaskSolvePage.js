@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         const urlParams = new URLSearchParams(window.location.search);
         const taskId = urlParams.get('taskId');
         var userId = urlParams.get('userId');
+        const taskType = urlParams.get('taskType');
+        const isTrainingMode = taskType === 'train';
         const taskData = await fetchTaskData(taskId, userId, true);
         const isViewMode = taskData.isSolved
         if (!taskData || !taskData.problem) {
@@ -38,6 +40,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
             }
             return;
+        }
+        
+        if (isTrainingMode) {
+            document.getElementById('training-mode').style.display = 'block';
         }
 
         renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
@@ -129,6 +135,35 @@ async function fetchTaskData(taskId, userId, isViewMode) {
     let url;
     let response;
 
+    if (isTrainingMode) {
+        url = `${apiHost}/AB/Train`;
+        response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка при получении тренировочной задачи: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!data.head) {
+            throw new Error('Данные задачи отсутствуют в ответе');
+        }
+
+        return {
+            id: null,
+            problem: { head: data.head },
+            userSolution: null,
+            userPath: null,
+            isSolved: false,
+            date: null,
+            correctSolution: null
+        };
+        }
     if (isViewMode && userId) {
         url = `${apiHost}/AB/Users/${userId}`;
         response = await fetch(url, {
@@ -444,7 +479,8 @@ async function submitSolution(userSolution) {
     }
     
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const response = await fetch(`${apiHost}/AB/Test`, {
+    const url = isTrainingMode ? `${apiHost}/AB/Train` : `${apiHost}/AB/Test`;
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -869,7 +905,7 @@ async function Logout() {
     });
 
     if (res.status === 200) {
-        sessionStorage.removeItem('userFullName'); // Clear stored name on logout
+        sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }

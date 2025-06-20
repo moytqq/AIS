@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     if (!restrictAccess()) return;
-    
+
     const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
     document.querySelector('.profile-tooltip_username').textContent = userFullName;
     document.querySelector('.userinfo__username').textContent = userFullName;
@@ -12,6 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
         adminLink.style.display = 'none';
     }
     
+    document.querySelectorAll('.tasklist_task-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskType = this.getAttribute('data-task-type');
+            if (taskType === 'ab-train') {
+                window.location.href = `/TaskSolvePage/TaskSolvePage.html?taskType=train`;
+            } else if (taskType === 'ab-test') {
+                fetchAssignedTasks();
+            }
+        });
+    });
+
     fetchAssignedTasks();
 });
 

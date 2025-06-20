@@ -186,6 +186,10 @@
     border-radius: 20px;
     align-self:flex-end;
 }
+.training-mode{
+    display: none; 
+    color: #4CAF50;
+}
 #tree-container {
     width: 100%;
     min-height: 500px;
