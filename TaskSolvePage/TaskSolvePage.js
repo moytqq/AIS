@@ -25,14 +25,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     try {
         const urlParams = new URLSearchParams(window.location.search);
-        const isViewMode = urlParams.get('view') === 'true';
         const taskId = urlParams.get('taskId');
-        const userId = urlParams.get('userId');
-
-        const taskData = await fetchTaskData(taskId, userId, isViewMode);
+        var userId = urlParams.get('userId');
+        const taskData = await fetchTaskData(taskId, userId, true);
+        const isViewMode = taskData.isSolved
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
-            window.location.href = isViewMode ? "/ProfileTeacherPage/ProfileTeacherPage.html" : "/ProfileStudentPage/ProfileStudentPage.html";
+            if (userId) {
+                window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+            }
+            else {
+                window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+            }
             return;
         }
 
@@ -111,7 +115,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
         console.error('Ошибка загрузки задачи:', error);
         alert('Не удалось загрузить задачу');
-        window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        if (userId) {
+            window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        }
+        else {
+            window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+        }
     }
 });
 
@@ -157,7 +166,8 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             userPath: data.task.userPath,
             isSolved: data.task.isSolved,
             date: data.task.date,
-            correctSolution: data.task.correctSolution || { nodes: [], path: [] }
+            correctSolution: { nodes: data.task.solution, path: data.task.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
+
         };
     } else {
         url = `${apiHost}/AB/Test`;
@@ -177,7 +187,20 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             throw new Error(`Ошибка при получении задачи: ${response.status} ${response.statusText}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        if (!data.problem) {
+            throw new Error('Данные задачи отсутствуют в ответе');
+        }
+
+        return {
+            id: data.id,
+            problem: data.problem,
+            userSolution: data.userSolution,
+            userPath: data.userPath,
+            isSolved: data.isSolved,
+            date: data.date,
+            correctSolution: { nodes: data.solution, path: data.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
+        };
     }
 }
 
@@ -228,8 +251,9 @@ function setupEventListeners(taskData, isViewMode = false) {
                 messageElement.innerHTML = `Не удалось проверить решение: ${error.message}`;
             }
         });
+    
 
-        document.addEventListener('click', function(e) {
+        document.querySelector('.section-tasksolve__task-display').addEventListener('click', function(e) {
             if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
                 e.preventDefault();
                 const line = e.target.classList.contains('hit-area') ? e.target.previousSibling : e.target;
@@ -240,12 +264,39 @@ function setupEventListeners(taskData, isViewMode = false) {
                 } else {
                     line.setAttribute('stroke', '#f44336');
                 }
+            } else if (e.target.classList.contains('tree-node')) {
+                e.preventDefault();
+                let node = e.target;
+                let id = parseInt(node.dataset.nodeId)
+                let line = document.querySelector(`.branch-line[data-child-id="${id}"]`);
+                if (line === null)
+                {
+                    return;
+                }  
+                let currColor = line.getAttribute('stroke') === '#f44336' ? '#808080' : '#f44336'
+                line.setAttribute('stroke', currColor);
+
+                currColor = line.getAttribute('stroke') === '#808080' ? '#808080' : '#f44336'
+                id = line.dataset.childId
+                let lines = document.querySelectorAll(`.branch-line[data-parent-id="${id}"]`);
+                if (lines === null)
+                {
+                    return;
+                }
+                lines.forEach(line =>
+                    {
+                        line.setAttribute('stroke', currColor);
+                    }
+                )
             }
         });
 
-        document.addEventListener('contextmenu', function(e) {
+        document.querySelector('.section-tasksolve__task-display').addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'INPUT') {
+                return;
+            }
+            e.preventDefault();
             if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
-                e.preventDefault();
                 const line = e.target.classList.contains('hit-area') ? e.target.previousSibling : e.target;
                 const parentId = parseInt(line.dataset.parentId);
                 const childId = parseInt(line.dataset.childId);
@@ -291,9 +342,83 @@ function setupEventListeners(taskData, isViewMode = false) {
                     
                     line.setAttribute('stroke', '#4CAF50');
                 }
+            } else if (e.target.classList.contains('tree-node')) {
+                let node = e.target;
+                let id = parseInt(node.dataset.nodeId)
+                let lines = [document.querySelector(`.branch-line[data-child-id="${id}"]`)];
+                if (lines[0] === null) {
+                    return;
+                }
+                lines.push(document.querySelector(`.branch-line[data-child-id="${lines[0].dataset.parentId}"]`))
+                let prevLineColor = null;
+                lines.forEach(line => {
+                    if (line === null)
+                    {
+                        document.querySelectorAll(`.branch-line[data-parent-id="${node.dataset.nodeId}"]`).forEach(
+                            line => {
+                                if (line.getAttribute('stroke') === '#4CAF50') {
+                                    line.setAttribute('stroke', '#808080');
+                                }
+                            }
+                        )
+                        return;
+                    }
+                    let currColor = line.getAttribute('stroke') 
+                    if (currColor === prevLineColor || prevLineColor && currColor === '#4CAF50')
+                    {
+                        return;
+                    }
+                    const parentId = parseInt(line.dataset.parentId);
+                    const childId = parseInt(line.dataset.childId);
+                    const currentColor = line.getAttribute('stroke');
+                    
+                    if (currentColor === '#4CAF50') {
+                        line.setAttribute('stroke', '#808080');
+                    }
+                    else {
+                        let levelOneNodeId;
+                        if (parentId === 0) {
+                            levelOneNodeId = childId;
+                        } else {
+                            const parentLine = document.querySelector(`.branch-line[data-child-id="${parentId}"]`);
+                            if (parentLine) {
+                                levelOneNodeId = parseInt(parentLine.dataset.childId);
+                            }
+                        }
+                        
+                        if (levelOneNodeId) {
+                            document.querySelectorAll('.branch-line').forEach(otherLine => {
+                                const otherChildId = parseInt(otherLine.dataset.childId);
+                                const otherParentId = parseInt(otherLine.dataset.parentId);
+                                let otherLevelOneNodeId;
+                                if (otherParentId === 0) {
+                                    otherLevelOneNodeId = otherChildId;
+                                } else {
+                                    const otherParentLine = document.querySelector(`.branch-line[data-child-id="${otherParentId}"]`);
+                                    if (otherParentLine) {
+                                        otherLevelOneNodeId = parseInt(otherParentLine.dataset.childId);
+                                    }
+                                }
+                                if (otherLevelOneNodeId && otherLevelOneNodeId !== levelOneNodeId && otherLine.getAttribute('stroke') === '#4CAF50') {
+                                    otherLine.setAttribute('stroke', '#808080');
+                                }
+                            });
+                        }
+                        
+                        document.querySelectorAll(`.branch-line[data-parent-id="${parentId}"]`).forEach(siblingLine => {
+                            if (siblingLine !== line && siblingLine.getAttribute('stroke') === '#4CAF50') {
+                                siblingLine.setAttribute('stroke', '#808080');
+                            }
+                        });
+                        
+                        line.setAttribute('stroke', '#4CAF50');
+                    }
+                    prevLineColor = line.getAttribute('stroke')
+                });
             }
         });
-        
+
+
         document.addEventListener('dblclick', function(e) {
             if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
                 e.preventDefault();
@@ -510,6 +635,15 @@ function checkSolution(userSolution, correctSolution) {
             }
         }
     });
+
+    greenBranchIds.forEach(id => {
+        if (!correctPath.has(id)) {
+            document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#ffe10d')
+        }
+    })
+    correctPath.forEach(id => {
+        document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#4CAF50')
+    })
     
     return {
         isCorrect: errors.length === 0,
