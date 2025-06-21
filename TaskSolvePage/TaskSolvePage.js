@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         const taskId = urlParams.get('taskId');
         var userId = urlParams.get('userId');
         const taskType = urlParams.get('taskType');
+        const isViewMode = urlParams.get('view') === 'true';
         const isTrainingMode = taskType === 'train';
-        const taskData = await fetchTaskData(taskId, userId, true);
-        const isViewMode = taskData.isSolved
+        const taskData = await fetchTaskData(taskId, userId, isViewMode, isTrainingMode);
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
             if (userId) {
@@ -47,19 +47,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
-        setupEventListeners(taskData, isViewMode);
+        setupEventListeners(taskData, isViewMode, isTrainingMode);
 
-        if (isViewMode) {
+        if (isViewMode || taskData.isSolved) {
             document.querySelectorAll('.node-input input').forEach(input => {
                 input.disabled = true;
             });
             const submitButton = document.getElementById('submit-solution');
-            if (submitButton) {
+            if (isViewMode && submitButton) {
                 submitButton.style.display = 'none';
+            } else if (taskData.isSolved && submitButton){
+                submitButton.style.display = 'block';
             }
             const solutionMessage = document.getElementById('solution-message');
             if (solutionMessage) {
-                solutionMessage.style.display = 'none';
+                solutionMessage.style.display = 'block';
             }
             if (taskData.userSolution && taskData.userPath && taskData.correctSolution) {
                 try {
@@ -130,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-async function fetchTaskData(taskId, userId, isViewMode) {
+async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     let url;
     let response;
@@ -164,7 +166,7 @@ async function fetchTaskData(taskId, userId, isViewMode) {
             correctSolution: null
         };
         }
-    if (isViewMode && userId) {
+    if (isViewMode) {
         url = `${apiHost}/AB/Users/${userId}`;
         response = await fetch(url, {
             method: 'GET',
@@ -206,9 +208,9 @@ async function fetchTaskData(taskId, userId, isViewMode) {
         };
     } else {
         url = `${apiHost}/AB/Test`;
-        if (taskId) {
-            url += `?taskId=${taskId}`;
-        }
+        // if (taskId) {
+        //     url += `?taskId=${taskId}`;
+        // }
 
         response = await fetch(url, {
             method: 'GET',
@@ -239,13 +241,13 @@ async function fetchTaskData(taskId, userId, isViewMode) {
     }
 }
 
-function setupEventListeners(taskData, isViewMode = false) {
+function setupEventListeners(taskData, isViewMode = false, isTrainingMode = false) {
     if (!isViewMode) {
         document.getElementById('submit-solution').addEventListener('click', async function() {
             const userSolution = collectSolution();
             const messageElement = document.getElementById('solution-message');
             try {
-                const response = await submitSolution(userSolution);
+                const response = await submitSolution(userSolution, isTrainingMode, taskData.problem);
                 const checkResult = checkSolution(userSolution, response);
                 console.log('Решение пользователя:', userSolution);
                 console.log('Результат проверки:', checkResult);
@@ -467,7 +469,7 @@ function setupEventListeners(taskData, isViewMode = false) {
     });
 }
 
-async function submitSolution(userSolution) {
+async function submitSolution(userSolution, isTrainingMode, problem) {
     if (!userSolution.nodes.every(node => Number.isInteger(node.id) && Number.isInteger(node.a) && Number.isInteger(node.b))) {
         throw new Error('Некорректные данные в узлах');
     }
@@ -480,16 +482,18 @@ async function submitSolution(userSolution) {
     
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const url = isTrainingMode ? `${apiHost}/AB/Train` : `${apiHost}/AB/Test`;
+    const body = isTrainingMode ? JSON.stringify({ head: problem.head, nodes: userSolution.nodes, path: userSolution.path }) : JSON.stringify({
+        nodes: userSolution.nodes,
+        path: userSolution.path
+    });
+
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authtoken}`
         },
-        body: JSON.stringify({
-            nodes: userSolution.nodes,
-            path: userSolution.path
-        })
+        body: body
     });
     
     if (!response.ok) {
@@ -671,7 +675,11 @@ function checkSolution(userSolution, correctSolution) {
             }
         }
     });
-
+    document.querySelectorAll('.branch-line').forEach(line => {
+        if (line.getAttribute('stroke') === '#ffe10d') {
+            line.setAttribute('stroke', '#808080');
+        }
+    });
     greenBranchIds.forEach(id => {
         if (!correctPath.has(id)) {
             document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#ffe10d')

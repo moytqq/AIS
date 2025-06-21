@@ -189,6 +189,7 @@
 .training-mode{
     display: none; 
     color: #4CAF50;
+    font-size: 22px;
 }
 #tree-container {
     width: 100%;

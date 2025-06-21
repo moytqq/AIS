@@ -87,7 +87,7 @@ function populateTasksTable(taskData) {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td>α & β отсечение</td>
+        <td>min-max алгоритм</td>
         <td>Преподаватель</td> <!-- Можно заменить на реальное имя преподавателя -->
         <td>${formattedDate}</td>
         <td>${status}</td>

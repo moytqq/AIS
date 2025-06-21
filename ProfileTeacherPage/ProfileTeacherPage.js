@@ -112,7 +112,7 @@ function populateTasksTable(tasks) {
         const viewButton = task.isSolved ? `<button class="button-view" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Посмотреть решение"></button>` : '';
         
         tr.innerHTML = `
-            <td>α & β отсечение</td>
+            <td>min-max алгоритм</td>
             <td>${shortName}</td>
             <td>${task.group}</td>
             <td>${formattedDate}</td>
