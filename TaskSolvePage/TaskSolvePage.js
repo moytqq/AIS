@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    
     if (!restrictAccess()) return;
 
     const userFullName = sessionStorage.getItem('userFullName');
@@ -30,20 +29,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         const taskType = urlParams.get('taskType');
         const isViewMode = urlParams.get('view') === 'true';
         const isTrainingMode = taskType === 'train';
+        
+        if (isTrainingMode) {
+            document.getElementById('training-mode').style.display = 'block';
+            document.getElementById('tasksettings').style.display = 'block';
+            document.getElementById('apply-settings').style.display = 'block';
+        }
+
         const taskData = await fetchTaskData(taskId, userId, isViewMode, isTrainingMode);
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
             if (userId) {
                 window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
-            }
-            else {
+            } else {
                 window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
             }
             return;
-        }
-        
-        if (isTrainingMode) {
-            document.getElementById('training-mode').style.display = 'block';
         }
 
         renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
@@ -56,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const submitButton = document.getElementById('submit-solution');
             if (isViewMode && submitButton) {
                 submitButton.style.display = 'none';
-            } else if (taskData.isSolved && submitButton){
+            } else if (taskData.isSolved && submitButton) {
                 submitButton.style.display = 'block';
             }
             const solutionMessage = document.getElementById('solution-message');
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     const checkResult = checkSolution({
                         nodes: taskData.userSolution,
                         path: taskData.userPath
-                    }, taskData.correctSolution);
+                    }, taskData.correctSolution, isTrainingMode);
                     console.log('Решение студента:', taskData.userSolution, taskData.userPath);
                     console.log('Результат проверки:', checkResult);
 
@@ -125,20 +126,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         alert('Не удалось загрузить задачу');
         if (userId) {
             window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
-        }
-        else {
+        } else {
             window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
         }
     }
 });
 
-async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode) {
+async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     let url;
     let response;
 
     if (isTrainingMode) {
         url = `${apiHost}/AB/Train`;
+        if (settings) {
+            const params = new URLSearchParams({
+                depth: settings.depth,
+                max: settings.max,
+                template: settings.template
+            });
+            url += `?${params.toString()}`;
+        }
         response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -165,7 +173,7 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode) {
             date: null,
             correctSolution: null
         };
-        }
+    }
     if (isViewMode) {
         url = `${apiHost}/AB/Users/${userId}`;
         response = await fetch(url, {
@@ -203,15 +211,10 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode) {
             userPath: data.task.userPath,
             isSolved: data.task.isSolved,
             date: data.task.date,
-            correctSolution: { nodes: data.task.solution, path: data.task.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
-
+            correctSolution: { nodes: data.task.solution, path: data.task.path } || { nodes: [], path: [] }
         };
     } else {
         url = `${apiHost}/AB/Test`;
-        // if (taskId) {
-        //     url += `?taskId=${taskId}`;
-        // }
-
         response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -236,7 +239,7 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode) {
             userPath: data.userPath,
             isSolved: data.isSolved,
             date: data.date,
-            correctSolution: { nodes: data.solution, path: data.path } || { nodes: [], path: [] } // Заглушка, если correctSolution отсутствует
+            correctSolution: { nodes: data.solution, path: data.path } || { nodes: [], path: [] }
         };
     }
 }
@@ -248,7 +251,7 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
             const messageElement = document.getElementById('solution-message');
             try {
                 const response = await submitSolution(userSolution, isTrainingMode, taskData.problem);
-                const checkResult = checkSolution(userSolution, response);
+                const checkResult = checkSolution(userSolution, response, isTrainingMode);
                 console.log('Решение пользователя:', userSolution);
                 console.log('Результат проверки:', checkResult);
                 messageElement.style.display = 'block';
@@ -288,7 +291,42 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
                 messageElement.innerHTML = `Не удалось проверить решение: ${error.message}`;
             }
         });
-    
+
+        if (isTrainingMode) {
+            document.getElementById('apply-settings').addEventListener('click', async function() {
+                const treeHeight = document.getElementById('tree-height-input').value;
+                const max = document.getElementById('max-input').value;
+                const template = document.getElementById('template-input').value;
+
+                if (!treeHeight || !max || !template || treeHeight < 1 || max < 1 || template < 1) {
+                    alert('Пожалуйста, заполните все поля настроек корректными значениями');
+                    return;
+                }
+
+                try {
+                    const settings = {
+                        depth: parseInt(treeHeight),
+                        max: parseInt(max),
+                        template: parseInt(template)
+                    };
+                    const newTaskData = await fetchTaskData(null, null, false, true, settings);
+                    if (!newTaskData || !newTaskData.problem) {
+                        throw new Error('Не удалось получить новое задание');
+                    }
+
+                    const solutionMessage = document.getElementById('solution-message');
+                    if (solutionMessage) {
+                        solutionMessage.style.display = 'none';
+                        solutionMessage.innerHTML = '';
+                    }
+
+                    renderTree(newTaskData.problem.head, null, 0, null, null, false);
+                } catch (error) {
+                    console.error('Ошибка применения настроек:', error);
+                    alert(`Не удалось применить настройки: ${error.message}`);
+                }
+            });
+        }
 
         document.querySelector('.section-tasksolve__task-display').addEventListener('click', function(e) {
             if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
@@ -304,27 +342,23 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
             } else if (e.target.classList.contains('tree-node')) {
                 e.preventDefault();
                 let node = e.target;
-                let id = parseInt(node.dataset.nodeId)
+                let id = parseInt(node.dataset.nodeId);
                 let line = document.querySelector(`.branch-line[data-child-id="${id}"]`);
-                if (line === null)
-                {
+                if (line === null) {
                     return;
                 }  
-                let currColor = line.getAttribute('stroke') === '#f44336' ? '#808080' : '#f44336'
+                let currColor = line.getAttribute('stroke') === '#f44336' ? '#808080' : '#f44336';
                 line.setAttribute('stroke', currColor);
 
-                currColor = line.getAttribute('stroke') === '#808080' ? '#808080' : '#f44336'
-                id = line.dataset.childId
+                currColor = line.getAttribute('stroke') === '#808080' ? '#808080' : '#f44336';
+                id = line.dataset.childId;
                 let lines = document.querySelectorAll(`.branch-line[data-parent-id="${id}"]`);
-                if (lines === null)
-                {
+                if (lines === null) {
                     return;
                 }
-                lines.forEach(line =>
-                    {
-                        line.setAttribute('stroke', currColor);
-                    }
-                )
+                lines.forEach(line => {
+                    line.setAttribute('stroke', currColor);
+                });
             }
         });
 
@@ -381,28 +415,26 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
                 }
             } else if (e.target.classList.contains('tree-node')) {
                 let node = e.target;
-                let id = parseInt(node.dataset.nodeId)
+                let id = parseInt(node.dataset.nodeId);
                 let lines = [document.querySelector(`.branch-line[data-child-id="${id}"]`)];
                 if (lines[0] === null) {
                     return;
                 }
-                lines.push(document.querySelector(`.branch-line[data-child-id="${lines[0].dataset.parentId}"]`))
+                lines.push(document.querySelector(`.branch-line[data-child-id="${lines[0].dataset.parentId}"]`));
                 let prevLineColor = null;
                 lines.forEach(line => {
-                    if (line === null)
-                    {
+                    if (line === null) {
                         document.querySelectorAll(`.branch-line[data-parent-id="${node.dataset.nodeId}"]`).forEach(
                             line => {
                                 if (line.getAttribute('stroke') === '#4CAF50') {
                                     line.setAttribute('stroke', '#808080');
                                 }
                             }
-                        )
+                        );
                         return;
                     }
-                    let currColor = line.getAttribute('stroke') 
-                    if (currColor === prevLineColor || prevLineColor && currColor === '#4CAF50')
-                    {
+                    let currColor = line.getAttribute('stroke');
+                    if (currColor === prevLineColor || prevLineColor && currColor === '#4CAF50') {
                         return;
                     }
                     const parentId = parseInt(line.dataset.parentId);
@@ -411,8 +443,7 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
                     
                     if (currentColor === '#4CAF50') {
                         line.setAttribute('stroke', '#808080');
-                    }
-                    else {
+                    } else {
                         let levelOneNodeId;
                         if (parentId === 0) {
                             levelOneNodeId = childId;
@@ -450,11 +481,10 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
                         
                         line.setAttribute('stroke', '#4CAF50');
                     }
-                    prevLineColor = line.getAttribute('stroke')
+                    prevLineColor = line.getAttribute('stroke');
                 });
             }
         });
-
 
         document.addEventListener('dblclick', function(e) {
             if (e.target.tagName === 'line' && (e.target.classList.contains('branch-line') || e.target.classList.contains('hit-area'))) {
@@ -513,7 +543,7 @@ async function submitSolution(userSolution, isTrainingMode, problem) {
     return responseData;
 }
 
-function checkSolution(userSolution, correctSolution) {
+function checkSolution(userSolution, correctSolution, isTrainingMode = false) {
     const errors = [];
     const solutionMap = new Map(correctSolution.nodes.map(node => [node.id, node]));
     const correctPath = new Set(correctSolution.path);
@@ -578,6 +608,7 @@ function checkSolution(userSolution, correctSolution) {
         const isPrunedByUser = redBranchIds.has(nodeId);
         const isSelectedByUser = greenBranchIds.has(nodeId);
         const isLevelTwo = levelTwoIds.has(nodeId);
+        const isLeaf = nodeElement.classList.contains('leaf-node');
         
         if (nodeElementDom && !userNodeIds.has(nodeId)) {
             nodeElementDom.classList.remove('pruned-node', 'correct-path-node', 'incorrectly-pruned-node');
@@ -591,8 +622,13 @@ function checkSolution(userSolution, correctSolution) {
             const correctNode = solutionMap.get(nodeId);
             const userNode = userSolution.nodes.find(n => n.id === nodeId);
             const isRoot = nodeId === 0;
-            const userValue = isRoot ? userNode.a : userNode.b;
-            const correctValue = isRoot ? correctNode.a : correctNode.b;
+            let userValue = isRoot ? userNode.a : userNode.b;
+            let correctValue = isRoot ? correctNode.a : correctNode.b;
+            
+            if (isLeaf) {
+                userValue = userNode.a; // Для листовых узлов используем только a
+                correctValue = correctNode.a;
+            }
             
             if (correctPath.has(nodeId) && !userPath.has(nodeId) && !isPrunedByUser) {
                 errors.push({
@@ -629,7 +665,8 @@ function checkSolution(userSolution, correctSolution) {
                         nodeElementDom.classList.add('incorrectly-pruned-node');
                     }
                 }
-            } else if (userValue === correctValue && (!isPrunedByUser || correctPath.has(nodeId))) {
+            } else if ((isLeaf && !isPrunedByUser && correctNodeIds.has(nodeId)) || 
+                       (!isLeaf && userValue === correctValue && (!isPrunedByUser || (isTrainingMode && correctNodeIds.has(nodeId))))) {
                 if (nodeElementDom) {
                     nodeElementDom.classList.add('correct-path-node');
                 }
@@ -682,12 +719,12 @@ function checkSolution(userSolution, correctSolution) {
     });
     greenBranchIds.forEach(id => {
         if (!correctPath.has(id)) {
-            document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#ffe10d')
+            document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#ffe10d');
         }
-    })
+    });
     correctPath.forEach(id => {
-        document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#4CAF50')
-    })
+        document.querySelector(`.branch-line[data-child-id="${id}"]`).setAttribute('stroke', '#4CAF50');
+    });
     
     return {
         isCorrect: errors.length === 0,
@@ -815,7 +852,7 @@ function collectSolution() {
         const input = nodeElement.querySelector('.node-input input');
         if (!input || input.value.trim() === '' || input.value <= 0) {
             emptyNodes.push(nodeId);
-        }else {
+        } else {
             const value = input.value.trim();
             const num = parseInt(value);
             if (isNaN(num) || num.toString() !== value) {

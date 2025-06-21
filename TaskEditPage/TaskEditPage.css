@@ -71,6 +71,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
+    flex-direction: column;
 }
 
 .tasksettings__input-group {
