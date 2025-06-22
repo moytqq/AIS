@@ -216,7 +216,10 @@ function handleViewSolution(e) {
     const taskType = button.dataset.taskType;
 
     console.log(`Просмотр решения: Task ID: ${taskId}, User ID: ${userId}, Task Type: ${taskType}`);
-    window.location.href = `/TaskSolvePage/TaskSolvePage.html?view=true&taskId=${taskId}&userId=${userId}&taskType=${taskType}`;
+    const baseUrl = taskType === 'min-max' 
+        ? '/TaskSolvePage/TaskSolvePage.html' 
+        : '/TaskSolveAPage/TaskSolveAPage.html';
+    window.location.href = `${baseUrl}?view=true&taskId=${taskId}&userId=${userId}&taskType=${taskType}`;
 }
 
 function handleTaskButtonClick(e) {

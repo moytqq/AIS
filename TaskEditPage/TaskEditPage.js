@@ -105,7 +105,10 @@ function updateTaskInfo(taskType) {
             </div>
             <div class="tasksettings__input-group">
                 <span>Эвристика:</span>
-                <input type="number" id="heuristic-input" min="1" max="2" value="1" title="1 - Манхэттенское расстояние, 2 - Евклидово расстояние">
+                <select class="tasksettings__input-group-dropdown" id="heuristic-input">
+                    <option value="1">Расстояние Хемминга</option>
+                    <option value="2">Манхэттенское расстояние</option>
+                </select>
             </div>
         `}
     `;

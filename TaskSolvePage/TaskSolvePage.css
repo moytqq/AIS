@@ -306,7 +306,7 @@
     padding-top: 50px;
 }
 .level-2 {
-    width: 70px;
+    width: auto;
     min-width: 70px;
     box-sizing: border-box;
 }
