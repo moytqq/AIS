@@ -5,12 +5,11 @@ on:
       - main
 jobs:
   dispatch:
-    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch update to AIC
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
           repository: GeThem/AICourseTester
           event-type: update-submodule
