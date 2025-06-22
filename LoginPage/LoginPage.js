@@ -37,7 +37,7 @@ async function sendLoginForm(data) {
         if (res.status === 200) {
             Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
             
-            const userRes = await fetch('https://localhost:7169/api/Users', {
+            const userRes = await fetch('https://localhost:7169/api/Users?getSelf=true', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ async function sendLoginForm(data) {
                     userData[0].patronymic
                 ]);
                 sessionStorage.setItem('userFullName', fullName);
-                sessionStorage.setItem('isTeacher', data.userName === 'Admin' ? 'true' : 'false');
+                sessionStorage.setItem('isTeacher', userRes.isAdmin ? 'true' : 'false');
                 
                 if (data.userName === 'Admin') {
                     window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
