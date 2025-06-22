@@ -1,3 +1,5 @@
+let taskData; // Глобальная переменная для хранения текущих данных задачи
+
 document.addEventListener('DOMContentLoaded', async function() {
     if (!restrictAccess()) return;
 
@@ -25,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const taskId = urlParams.get('taskId');
-        var userId = urlParams.get('userId');
+        const userId = urlParams.get('userId');
         const taskType = urlParams.get('taskType');
         const isViewMode = urlParams.get('view') === 'true';
         const isTrainingMode = taskType === 'train';
@@ -36,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('apply-settings').style.display = 'block';
         }
 
-        const taskData = await fetchTaskData(taskId, userId, isViewMode, isTrainingMode);
+        taskData = await fetchTaskData(taskId, userId, isViewMode, isTrainingMode);
         if (!taskData || !taskData.problem) {
             alert('Данные задачи не найдены');
             if (userId) {
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         renderTree(taskData.problem.head, null, 0, taskData.userSolution, taskData.userPath, taskData.isSolved);
-        setupEventListeners(taskData, isViewMode, isTrainingMode);
+        resetEventListeners(isViewMode, isTrainingMode);
 
         if (isViewMode || taskData.isSolved) {
             document.querySelectorAll('.node-input input').forEach(input => {
@@ -244,7 +246,28 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, setting
     }
 }
 
-function setupEventListeners(taskData, isViewMode = false, isTrainingMode = false) {
+function resetEventListeners(isViewMode = false, isTrainingMode = false) {
+    // Удаляем существующие обработчики событий, чтобы избежать дублирования
+    const submitButton = document.getElementById('submit-solution');
+    const applySettingsButton = document.getElementById('apply-settings');
+    const taskDisplay = document.querySelector('.section-tasksolve__task-display');
+    const logoutButton = document.getElementById('profile-tooltip__button-logout');
+    
+    // Клонируем элементы, чтобы удалить старые обработчики
+    if (submitButton) {
+        const newSubmitButton = submitButton.cloneNode(true);
+        submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
+    }
+    if (applySettingsButton) {
+        const newApplySettingsButton = applySettingsButton.cloneNode(true);
+        applySettingsButton.parentNode.replaceChild(newApplySettingsButton, applySettingsButton);
+    }
+    if (taskDisplay) {
+        const newTaskDisplay = taskDisplay.cloneNode(true);
+        taskDisplay.parentNode.replaceChild(newTaskDisplay, taskDisplay);
+    }
+    
+    // Устанавливаем новые обработчики
     if (!isViewMode) {
         document.getElementById('submit-solution').addEventListener('click', async function() {
             const userSolution = collectSolution();
@@ -309,8 +332,8 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
                         max: parseInt(max),
                         template: parseInt(template)
                     };
-                    const newTaskData = await fetchTaskData(null, null, false, true, settings);
-                    if (!newTaskData || !newTaskData.problem) {
+                    taskData = await fetchTaskData(null, null, false, true, settings); // Обновляем taskData
+                    if (!taskData || !taskData.problem) {
                         throw new Error('Не удалось получить новое задание');
                     }
 
@@ -320,7 +343,8 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
                         solutionMessage.innerHTML = '';
                     }
 
-                    renderTree(newTaskData.problem.head, null, 0, null, null, false);
+                    renderTree(taskData.problem.head, null, 0, null, null, false);
+                    resetEventListeners(isViewMode, isTrainingMode); // Перерегистрируем обработчики с новым taskData
                 } catch (error) {
                     console.error('Ошибка применения настроек:', error);
                     alert(`Не удалось применить настройки: ${error.message}`);
@@ -493,7 +517,7 @@ function setupEventListeners(taskData, isViewMode = false, isTrainingMode = fals
         });
     }
 
-    document.getElementById('profile-tooltip__button-logout').addEventListener('click', function(e) {
+    logoutButton.addEventListener('click', function(e) {
         e.preventDefault();
         Logout();
     });

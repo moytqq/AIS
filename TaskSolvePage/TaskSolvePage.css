@@ -426,9 +426,10 @@
 }
 #solution-message {
     display: none;
+    margin-right: 10px;
     margin-top: 10px;
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 15px;
     font-size: 18px;
     line-height: 1.5;
     /* margin-left: 15px;
