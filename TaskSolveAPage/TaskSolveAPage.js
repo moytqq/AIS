@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(refreshtoken)) {
+    if (isTokenExpired(authtoken)) {
         refreshToken()
     }
     if (!authtoken) {
@@ -323,9 +323,9 @@ function createNodeElement(node, level, isViewMode) {
         inputsContainer.appendChild(inputGroup);
     });
 
-    const idLabel = document.createElement('div');
-    idLabel.className = 'node-id';
-    idLabel.textContent = `ID: ${node.id}`;
+    // const idLabel = document.createElement('div');
+    // idLabel.className = 'node-id';
+    // idLabel.textContent = `ID: ${node.id}`;
 
     nodeElement.appendChild(idLabel);
     nodeElement.appendChild(board);
@@ -508,7 +508,7 @@ function collectSolution() {
 async function submitSolution(userSolution, isTrainingMode, taskData) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(refreshtoken)) {
+    if (isTokenExpired(authtoken)) {
         refreshToken()
     }
     const url = isTrainingMode ? `${apiHost}/A/FifteenPuzzle/Train` : `${apiHost}/A/FifteenPuzzle/Test`;
@@ -602,7 +602,7 @@ function displaySolutionFeedback(taskData) {
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(refreshtoken)) {
+    if (isTokenExpired(authtoken)) {
         refreshToken()
     }
     const res = await fetch(`${apiHost}/Users/Logout`, {

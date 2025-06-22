@@ -36,7 +36,7 @@ async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
         const res = await fetch(`${apiHost}/Users/Logout`, {
@@ -63,7 +63,7 @@ async function fetchAssignedTasks(specificTaskType = null) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
         const tasks = [];

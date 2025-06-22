@@ -23,7 +23,7 @@ async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
         const res = await fetch(`${apiHost}/Users/Logout`, {
@@ -49,7 +49,7 @@ async function fetchAssignedTasks() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
         if (!authtoken) {
@@ -178,7 +178,7 @@ async function handleDeleteTask(e) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
         const endpoint = taskType === 'min-max' ? `${apiHost}/AB/Users/${userId}` : `${apiHost}/A/FifteenPuzzle/Users/${userId}`;

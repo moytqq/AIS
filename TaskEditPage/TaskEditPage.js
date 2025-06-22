@@ -122,7 +122,7 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(refreshtoken)) {
+    if (isTokenExpired(authtoken)) {
         refreshToken()
     }
     const res = await fetch(`${apiHost}/Users/Logout`, {
@@ -142,7 +142,7 @@ async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
         const response = await fetch(`${apiHost}/Users`, {
@@ -220,7 +220,7 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(refreshtoken)) {
+        if (isTokenExpired(authtoken)) {
             refreshToken()
         }
 
