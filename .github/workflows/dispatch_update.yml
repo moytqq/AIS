@@ -2,7 +2,7 @@ name: Dispatch Update Submodule
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   dispatch:
     runs-on: ubuntu-latest
