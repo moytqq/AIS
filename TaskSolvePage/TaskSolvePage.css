@@ -499,7 +499,6 @@
     border: 1px solid #7F7C7C;
     padding: 0 10px;
 }
-/* ... (unchanged existing styles) */
 
 .puzzle-board {
     display: grid;
