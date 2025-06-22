@@ -97,6 +97,10 @@ async function checkIfUserExists(userId) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const response = await fetch(`${apiHost}/Users/${userId}`, {
             method: 'GET',
             headers: {
@@ -123,6 +127,10 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     const res = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
@@ -213,6 +221,10 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
 
 async function addUser(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     try {
         const res = await fetch(`${apiHost}/Users/Register`, {
             method: 'POST',
@@ -252,6 +264,10 @@ async function addGroup(groupName) {
     }
 
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     const res = await fetch(`${apiHost}/Users/Groups?groupName=` + groupName, {
         method: 'POST',
         headers: {
@@ -310,6 +326,10 @@ async function deleteGroup(groupId) {
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
             headers: {
@@ -361,6 +381,10 @@ function populateTable(data) {
 async function deleteRecord(id) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const response = await fetch(`${apiHost}/Users?userId=` + id, {
             method: 'DELETE',
             headers: {
@@ -379,6 +403,10 @@ async function deleteRecord(id) {
 async function editRecord(id) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const response = await fetch(`${apiHost}/Users/${id}`, {
             method: 'GET',
             headers: {
@@ -406,6 +434,10 @@ async function putUser(data) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const response = await fetch(`${apiHost}/Users?userId=${data.userId}`, {
             method: 'PUT',
             headers: {
@@ -428,6 +460,10 @@ async function putUser(data) {
 async function fetchGroups() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const response = await fetch(`${apiHost}/Users/Groups`, {
             method: 'GET',
             headers: {

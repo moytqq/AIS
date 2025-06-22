@@ -27,7 +27,7 @@ document.getElementById('form_login').addEventListener('submit', e => {
 
 async function sendLoginForm(data) {
     try {
-        const res = await fetch('https://localhost:7169/api/Users/Login', {
+        const res = await fetch(`${apiHost}/Users/Login`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
@@ -36,8 +36,9 @@ async function sendLoginForm(data) {
         const result = await res.json();
         if (res.status === 200) {
             Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
+            Cookies.set('RefreshToken', result.refreshToken);
             
-            const userRes = await fetch('https://localhost:7169/api/Users?getSelf=true', {
+            const userRes = await fetch(`${apiHost}/Users?getSelf=true`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

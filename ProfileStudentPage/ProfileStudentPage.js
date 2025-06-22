@@ -35,6 +35,10 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const res = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
             headers: {
@@ -58,6 +62,10 @@ async function Logout() {
 async function fetchAssignedTasks(specificTaskType = null) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const tasks = [];
 
         // Fetch Min-Max task if not restricted to a-star
@@ -77,7 +85,6 @@ async function fetchAssignedTasks(specificTaskType = null) {
                 throw new Error(`Ошибка HTTP (Min-Max): ${minMaxResponse.status}`);
             }
         }
-
         // Fetch A* task if not restricted to min-max
         if (!specificTaskType || specificTaskType === 'a-star') {
             const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Test`, {

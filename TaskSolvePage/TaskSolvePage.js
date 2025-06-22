@@ -136,6 +136,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     let url;
     let response;
 
@@ -535,6 +539,10 @@ async function submitSolution(userSolution, isTrainingMode, problem) {
     }
     
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     const url = isTrainingMode ? `${apiHost}/AB/Train` : `${apiHost}/AB/Test`;
     const body = isTrainingMode ? JSON.stringify({ head: problem.head, nodes: userSolution.nodes, path: userSolution.path }) : JSON.stringify({
         nodes: userSolution.nodes,
@@ -966,6 +974,10 @@ function convertInputValue(value) {
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     const res = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {

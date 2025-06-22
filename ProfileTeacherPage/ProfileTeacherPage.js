@@ -22,6 +22,10 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const res = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
             headers: {
@@ -44,6 +48,10 @@ async function Logout() {
 async function fetchAssignedTasks() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         if (!authtoken) {
             throw new Error('Токен авторизации отсутствует');
         }
@@ -169,6 +177,10 @@ async function handleDeleteTask(e) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        const refreshtoken = Cookies.get('RefreshToken')
+        if (isTokenExpired(refreshtoken)) {
+            refreshToken()
+        }
         const endpoint = taskType === 'min-max' ? `${apiHost}/AB/Users/${userId}` : `${apiHost}/A/FifteenPuzzle/Users/${userId}`;
         const response = await fetch(endpoint, {
             method: 'DELETE',
