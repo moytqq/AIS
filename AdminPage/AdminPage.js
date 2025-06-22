@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-
     if (!restrictAccess()) return;
 
     const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
@@ -10,10 +9,12 @@ document.addEventListener('DOMContentLoaded', function () {
         setupGroupButtons();
     });
 });
+
 function splitFullName(FullName, separator) {
     let SplittedFullName = FullName.split(separator);
-    return (SplittedFullName);
+    return SplittedFullName;
 }
+
 function joinFullName(data) {
     data.forEach(row => {
         const nameParts = [];
@@ -22,10 +23,10 @@ function joinFullName(data) {
         if (row.patronymic) nameParts.push(row.patronymic);
         
         row.name = nameParts.join(' ');
-        
         row.group = row.group || '----------';
     });
 }
+
 function generateLogin(fullName) {
     const translitRules = {
         'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh',
@@ -49,26 +50,14 @@ function generateLogin(fullName) {
     let baseLogin = '';
 
     if (lastName && firstName && middleName) {
-        baseLogin = (
-            lastName.toLowerCase() +
-            firstName[0].toLowerCase() +
-            middleName[0].toLowerCase()
-        );
-    }
-    else if (firstName && middleName) {
-        baseLogin = (
-            firstName.toLowerCase() + '.' + middleName.toLowerCase()
-        );
-    }
-    else if (lastName && firstName) {
-        baseLogin = (
-            lastName.toLowerCase() + firstName[0].toLowerCase()
-        );
-    }
-    else if (lastName) {
+        baseLogin = lastName.toLowerCase() + firstName[0].toLowerCase() + middleName[0].toLowerCase();
+    } else if (firstName && middleName) {
+        baseLogin = firstName.toLowerCase() + '.' + middleName.toLowerCase();
+    } else if (lastName && firstName) {
+        baseLogin = lastName.toLowerCase() + firstName[0].toLowerCase();
+    } else if (lastName) {
         baseLogin = lastName.toLowerCase();
-    }
-    else {
+    } else {
         baseLogin = 'user' + Math.floor(Math.random() * 100);
     }
 
@@ -81,30 +70,28 @@ function generateLogin(fullName) {
 
     return baseLogin;
 }
+
 function generatePassword(length = 8) {
     if (length < 8) length = 8;
 
     const groups = [
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZ', // Заглавные
-        'abcdefghijklmnopqrstuvwxyz', // Строчные
-        '0123456789', // Цифры
-        '!@#$%^&*' // Спецсимволы
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'abcdefghijklmnopqrstuvwxyz',
+        '0123456789',
+        '!@#$%^&*'
     ];
 
-    // Берем минимум по одному символу из каждой группы
     let password = groups.map(group => group[Math.floor(Math.random() * group.length)]);
 
-    // Дополняем случайными символами из всех групп
     const allChars = groups.join('');
     for (let i = 0; i < length - groups.length; i++) {
         password.push(allChars[Math.floor(Math.random() * allChars.length)]);
     }
 
-    // Перемешиваем
     password = password.sort(() => Math.random() - 0.5).join('');
-
     return password;
 }
+
 async function checkIfUserExists(userId) {
     if (!userId) return false;
 
@@ -123,6 +110,7 @@ async function checkIfUserExists(userId) {
         return false;
     }
 }
+
 async function checkIfGroupExists(groupName) {
     const groups = await fetchGroups();
     return groups.some(group => group.name === groupName);
@@ -130,9 +118,8 @@ async function checkIfGroupExists(groupName) {
 
 document.getElementById('profile-tooltip__button-logout').addEventListener('click', e => {
     e.preventDefault();
-
     Logout();
-})
+});
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
@@ -144,18 +131,16 @@ async function Logout() {
     });
 
     if (res.status === 200) {
-        sessionStorage.removeItem('userFullName'); // Clear stored name on logout
+        sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }
 
 document.getElementById('id_button_generate_login_password').addEventListener('click', e => {
     e.preventDefault();
-
     document.getElementById('id_userName').value = generateLogin(document.getElementById('id_userFullName').value);
-    document.getElementById('id_userPassword').value = generatePassword()
-
-})
+    document.getElementById('id_userPassword').value = generatePassword();
+});
 
 document.getElementById('id_button_admin_save').addEventListener('click', async e => {
     e.preventDefault();
@@ -164,14 +149,35 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
     const from_register_user_styles = window.getComputedStyle(from_register_user);
     const id_groupId = document.getElementById('id_groupId').value;
     const userId = document.getElementById('id_userId').value;
+    const userFullName = document.getElementById('id_userFullName').value.trim();
+    const userName = document.getElementById('id_userName').value.trim();
+    const userPassword = document.getElementById('id_userPassword').value.trim();
 
     if (from_register_user_styles.display !== 'none') {
-        const SplittedFullName = splitFullName(document.getElementById('id_userFullName').value, " ");
+        // Validate required fields
+        if (!id_groupId) {
+            alert('Пожалуйста, выберите группу');
+            return;
+        }
+        if (!userFullName) {
+            alert('Пожалуйста, введите ФИО');
+            return;
+        }
+        if (!userName) {
+            alert('Пожалуйста, введите логин');
+            return;
+        }
+        if (!userPassword) {
+            alert('Пожалуйста, введите пароль');
+            return;
+        }
+
+        const SplittedFullName = splitFullName(userFullName, " ");
 
         const data = {
             userId: userId,
-            userName: document.getElementById('id_userName').value,
-            password: document.getElementById('id_userPassword').value,
+            userName: userName,
+            password: userPassword,
             name: SplittedFullName[1] || "",
             secondName: SplittedFullName[0] || "",
             patronymic: SplittedFullName[2] || "-",
@@ -207,23 +213,33 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
 
 async function addUser(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const res = await fetch(`${apiHost}/Users/Register`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authtoken}`
-        },
-        body: JSON.stringify(data)
-    });
+    try {
+        const res = await fetch(`${apiHost}/Users/Register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            },
+            body: JSON.stringify(data)
+        });
 
-    if (res.status === 200) {
-        alert('Пользователь добавлен')
-        fetchDBData();
+        if (res.status === 200) {
+            alert('Пользователь добавлен');
+            document.getElementById("id_groupName-of-user").value = '';
+            fetchDBData();
+        } else if (res.status === 400) {
+            const errorData = await res.json();
+            alert(`Ошибка: Пользователь с логином "${data.userName}" уже существует`);
+        } else {
+            alert('Ошибка при добавлении пользователя');
+        }
+    } catch (error) {
+        console.error('Ошибка при добавлении пользователя:', error);
+        alert('Произошла ошибка при добавлении пользователя');
     }
 }
 
 async function addGroup(groupName) {
-    
     if (!groupName || !groupName.trim()) {
         alert('Введите название группы');
         return false;
@@ -245,7 +261,7 @@ async function addGroup(groupName) {
     });
 
     if (res.ok) {
-        document.getElementById("id_groupName-of-user").value = ''
+        document.getElementById("id_groupName-of-user").value = '';
         alert('Группа успешно добавлена');
         await Promise.all([fetchDBData(), setupGroupDropdowns()]);
         return true;
@@ -290,6 +306,7 @@ async function deleteGroup(groupId) {
         return false;
     }
 }
+
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
@@ -301,34 +318,29 @@ async function fetchDBData() {
             },
         });
         const data = await response.json();
-        console.log("fetch")
         populateTable(data);
         return data;
     } catch (error) {
         console.error('Ошибка при получении данных:', error);
     }
 }
+
 function populateTable(data) {
     const tableBody = document.querySelector('#admin-users-table tbody');
     tableBody.innerHTML = '';
     joinFullName(data);
 
     data.forEach(row => {
-        
-
-            const tr = document.createElement('tr');
-
-            tr.innerHTML = `
-                <td>${row.group}</td>
-                <td>${row.name}</td>
-                <td class="actions-cell">
-                    <button class="button-edit" id="id_admin-list__button-edit" data-id="${row.id}" title="Редактировать"></button>
-                    <button class="button-delete" id="id_admin-list__button-delete" data-id="${row.id}" title="Удалить"></button>
-                </td>
-            `;
-
-            tableBody.appendChild(tr);
-        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.group}</td>
+            <td>${row.name}</td>
+            <td class="actions-cell">
+                <button class="button-edit" id="id_admin-list__button-edit" data-id="${row.id}" title="Редактировать"></button>
+                <button class="button-delete" id="id_admin-list__button-delete" data-id="${row.id}" title="Удалить"></button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
     });
 
     document.querySelectorAll('#id_admin-list__button-delete').forEach(btn => {
@@ -336,21 +348,18 @@ function populateTable(data) {
             if (confirm('Вы уверены, что хотите удалить эту запись?')) {
                 await deleteRecord(this.getAttribute('data-id'));
             }
-
         });
     });
+
     document.querySelectorAll('#id_admin-list__button-edit').forEach(btn => {
         btn.addEventListener('click', async function () {
             await editRecord(this.getAttribute('data-id'));
         });
     });
-};
+}
 
 async function deleteRecord(id) {
     try {
-        if (typeof id === String) {
-            arrOfIds = [id];
-        }
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const response = await fetch(`${apiHost}/Users?userId=` + id, {
             method: 'DELETE',
@@ -366,6 +375,7 @@ async function deleteRecord(id) {
         alert('Не удалось удалить запись');
     }
 }
+
 async function editRecord(id) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
@@ -380,15 +390,15 @@ async function editRecord(id) {
     } catch (error) {
         console.error('Ошибка при получении данных:', error);
     }
-    document.getElementById('id_groupName-of-user').value = userdata.group || '----------'
-    document.getElementById('id_userFullName').value = [userdata.secondName, userdata.name, userdata.patronymic].join(' ')
-    document.getElementById('id_userId').value = userdata.id
-    document.getElementById('id_groupId').value = userdata.groupId 
+    document.getElementById('id_groupName-of-user').value = userdata.group || '----------';
+    document.getElementById('id_userFullName').value = [userdata.secondName, userdata.name, userdata.patronymic].join(' ');
+    document.getElementById('id_userId').value = userdata.id;
+    document.getElementById('id_groupId').value = userdata.groupId;
 }
 
 async function putUser(data) {
     var form_data = new FormData();
-    for ( var key in data ) {
+    for (var key in data) {
         if (key !== 'userId') {
             form_data.append(key, data[key]);
         }
@@ -405,15 +415,14 @@ async function putUser(data) {
         });
         if (response.status == 200) {
             alert('Запись успешно изменена');
-        }
-        else{
-            alert('oops')
+        } else {
+            alert('Ошибка при обновлении пользователя');
         }
         fetchDBData();
     } catch (error) {
-
+        console.error('Ошибка:', error);
+        alert('Произошла ошибка при обновлении пользователя');
     }
-
 }
 
 async function fetchGroups() {
@@ -454,22 +463,18 @@ async function setupGroupDropdowns() {
 }
 
 function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
-    // Remove any existing dropdowns
     document.querySelectorAll('.group-dropdown').forEach(d => d.remove());
 
-    // If the dropdown was just closed, don't create a new one
     if (button.classList.contains('dropdown-open')) {
         button.classList.remove('dropdown-open');
         return;
     }
 
-    // Mark button as open
     button.classList.add('dropdown-open');
 
     const dropdown = document.createElement('div');
     dropdown.className = 'group-dropdown';
 
-    // Populate dropdown with group items
     groups.forEach(group => {
         const item = document.createElement('div');
         item.className = 'group-dropdown-item';
@@ -510,7 +515,9 @@ function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
     };
 
     setTimeout(() => document.addEventListener('click', closeHandler), 0);
-}function setupGroupButtons() {
+}
+
+function setupGroupButtons() {
     document.querySelector('.profile-tooltip__button-add-group')?.addEventListener('click', async function(e) {
         e.preventDefault();
         const groupNameInput = document.getElementById('id_groupName-of-user');
@@ -527,6 +534,7 @@ function toggleGroupDropdown(button, groups, inputNameId, inputGroupId = null) {
             document.getElementById('id_groupId').value = '';
         }
     });
+
     document.querySelector('.profile-tooltip__button-delete-group')?.addEventListener('click', async function(e) {
         e.preventDefault();
         const groupId = document.getElementById('id_groupId').value;
