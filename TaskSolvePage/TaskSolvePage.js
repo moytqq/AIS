@@ -1,4 +1,4 @@
-let taskData; // Глобальная переменная для хранения текущих данных задачи
+let taskData;
 
 document.addEventListener('DOMContentLoaded', async function() {
     if (!restrictAccess()) return;
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         if (checkResult.isCorrect) {
                             solutionMessage.classList.remove('error');
                             solutionMessage.classList.add('success');
-                            solutionMessage.innerHTML = 'Все значения α и β, узлы, путь и отсечения выполнены правильно!';
+                            solutionMessage.innerHTML = 'Все минимаксные значения, узлы, путь и отсечения выполнены правильно!';
                         } else {
                             solutionMessage.classList.remove('success');
                             solutionMessage.classList.add('error');
@@ -282,7 +282,7 @@ function resetEventListeners(isViewMode = false, isTrainingMode = false) {
                 if (checkResult.isCorrect) {
                     messageElement.classList.remove('error');
                     messageElement.classList.add('success');
-                    messageElement.innerHTML = 'Все значения α и β, узлы, путь и отсечения выполнены правильно!';
+                    messageElement.innerHTML = 'Все минимаксные значения, узлы, путь и отсечения выполнены правильно!';
                 } else {
                     messageElement.classList.remove('success');
                     messageElement.classList.add('error');
@@ -978,3 +978,4 @@ async function Logout() {
         window.location.href = "/LoginPage/LoginPage.html";
     }
 }
+

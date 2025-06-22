@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     if (!restrictAccess()) return;
 
     const userFullName = sessionStorage.getItem('userFullName') || 'Иванов И. И.';
@@ -24,7 +23,7 @@ async function Logout() {
             }
         });
         if (res.status === 200) {
-            sessionStorage.removeItem('userFullName'); // Clear stored name on logout
+            sessionStorage.removeItem('userFullName');
             window.location.href = "/LoginPage/LoginPage.html";
         } else {
             console.error('Ошибка выхода:', res.status, res.statusText);
@@ -35,53 +34,65 @@ async function Logout() {
         alert('Произошла ошибка при выходе');
     }
 }
+
 async function fetchAssignedTasks() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         if (!authtoken) {
             throw new Error('Токен авторизации отсутствует');
         }
-        
-        console.log('Отправка запроса к API:', `${apiHost}/AB/Users/`);
-        const tasksResponse = await fetch(`${apiHost}/AB/Users/`, {
+
+        // Fetch Min-Max tasks
+        const minMaxResponse = await fetch(`${apiHost}/AB/Users/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${authtoken}`
             }
         });
-        
-        if (!tasksResponse.ok) {
-            throw new Error(`Ошибка HTTP: ${tasksResponse.status} ${tasksResponse.statusText}`);
+
+        // Fetch A* Fifteen Puzzle tasks
+        const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Users/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authtoken}`
+            }
+        });
+
+        if (!minMaxResponse.ok) {
+            throw new Error(`Ошибка HTTP (Min-Max): ${minMaxResponse.status} ${minMaxResponse.statusText}`);
         }
-        
-        const tasks = await tasksResponse.json();
-        console.log('Ответ API:', tasks);
-        
-        if (!Array.isArray(tasks)) {
+        if (!aStarResponse.ok) {
+            throw new Error(`Ошибка HTTP (A*): ${aStarResponse.status} ${aStarResponse.statusText}`);
+        }
+
+        const minMaxTasks = await minMaxResponse.json();
+        const aStarTasks = await aStarResponse.json();
+
+        if (!Array.isArray(minMaxTasks) || !Array.isArray(aStarTasks)) {
             throw new Error('Ответ API не является массивом заданий');
         }
-        
-        const tasksWithUserInfo = tasks.map(assignment => {
-            if (!assignment.user || !assignment.user.id || !assignment.task) {
-                console.warn('Некорректная структура задания:', assignment);
-                return {
-                    ...assignment.task || {},
-                    userId: 'unknown',
-                    userName: 'Неизвестный пользователь',
-                    group: '----------'
-                };
-            }
-            const user = assignment.user;
-            return {
+
+        // Combine tasks with task type information
+        const tasksWithUserInfo = [
+            ...minMaxTasks.map(assignment => ({
                 ...assignment.task,
-                userId: user.id,
-                userName: [user.secondName, user.name, user.patronymic].filter(Boolean).join(' '),
-                group: user.group || '----------'
-            };
-        });
-        
-        console.log('Преобразованные данные:', tasksWithUserInfo);
+                userId: assignment.user?.id || 'unknown',
+                userName: assignment.user ? [assignment.user.secondName, assignment.user.name, assignment.user.patronymic].filter(Boolean).join(' ') : 'Неизвестный пользователь',
+                group: assignment.user?.group || '----------',
+                taskType: 'min-max'
+            })),
+            ...aStarTasks.map(assignment => ({
+                ...assignment.task,
+                userId: assignment.user?.id || 'unknown',
+                userName: assignment.user ? [assignment.user.secondName, assignment.user.name, assignment.user.patronymic].filter(Boolean).join(' ') : 'Неизвестный пользователь',
+                group: assignment.user?.group || '----------',
+                taskType: 'a-star'
+            }))
+        ];
+
+        console.log('Преобразованные данные:', tasksWithUserInfo); // Диагностика
         populateTasksTable(tasksWithUserInfo);
     } catch (error) {
         console.error('Ошибка в fetchAssignedTasks:', error.message, error.stack);
@@ -100,39 +111,40 @@ function populateTasksTable(tasks) {
     tasks.forEach(task => {
         const tr = document.createElement('tr');
         tr.style.whiteSpace = 'nowrap';
-        
+
         const date = new Date(task.date || Date.now());
         const formattedDate = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
         const shortName = formatShortName(task.userName);
         const status = task.isSolved ? 'Выполнено' : 'Выдано';
         const userId = task.userId || 'unknown';
-        
-        console.log(`Рендеринг строки: Task ID: ${task.id || 'unknown'}, User ID: ${userId}, User Name: ${shortName}`);
-        
-        const viewButton = task.isSolved ? `<button class="button-view" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Посмотреть решение"></button>` : '';
-        
+        const taskName = task.taskType === 'min-max' ? 'min-max алгоритм' : 'Пятнашки A*';
+
+        console.log('Создание строки таблицы:', { taskId: task.id, userId, taskType: task.taskType, taskName }); // Диагностика
+
+        const viewButton = task.isSolved ? `<button class="button-view" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Посмотреть решение"></button>` : '';
+
         tr.innerHTML = `
-            <td>min-max алгоритм</td>
+            <td>${taskName}</td>
             <td>${shortName}</td>
             <td>${task.group}</td>
             <td>${formattedDate}</td>
             <td>${status}</td>
             <td class="actions-cell">
-                <button class="button-edit" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Редактировать"></button>
-                <button class="button-delete" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" title="Удалить"></button>
+                <button class="button-edit" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Редактировать"></button>
+                <button class="button-delete" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Удалить"></button>
                 ${viewButton}
             </td>
         `;
-        
+
         tableBody.appendChild(tr);
     });
 
     document.querySelectorAll('.button-delete').forEach(button => {
         button.addEventListener('click', handleDeleteTask);
-    }); 
+    });
     document.querySelectorAll('.button-edit').forEach(button => {
         button.addEventListener('click', handleEditTask);
-    }); 
+    });
     document.querySelectorAll('.button-view').forEach(button => {
         button.addEventListener('click', handleViewSolution);
     });
@@ -142,15 +154,16 @@ async function handleDeleteTask(e) {
     const button = e.currentTarget;
     const taskId = button.dataset.taskId;
     const userId = button.dataset.userId;
-    
+    const taskType = button.dataset.taskType;
+
     if (!confirm('Вы уверены, что хотите удалить это задание?')) {
         return;
     }
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        console.log(`Удаление задания: Task ID: ${taskId}, User ID: ${userId}`);
-        const response = await fetch(`${apiHost}/AB/Users/${userId}`, {
+        const endpoint = taskType === 'min-max' ? `${apiHost}/AB/Users/${userId}` : `${apiHost}/A/FifteenPuzzle/Users/${userId}`;
+        const response = await fetch(endpoint, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -174,27 +187,29 @@ function handleEditTask(e) {
     const button = e.currentTarget;
     const taskId = button.dataset.taskId;
     const userId = button.dataset.userId;
+    const taskType = button.dataset.taskType;
     const userName = button.closest('tr').querySelector('td:nth-child(2)').textContent;
     const userGroup = button.closest('tr').querySelector('td:nth-child(3)').textContent;
-    
-    console.log(`Редактирование: Task ID: ${taskId}, User ID: ${userId}, User Name: ${userName}`);
-    window.location.href = `/TaskEditPage/TaskEditPage.html?userId=${userId}&userName=${encodeURIComponent(userName)}&userGroup=${encodeURIComponent(userGroup)}&taskId=${taskId}`;
+
+    console.log('handleEditTask:', { taskId, userId, taskType, userName, userGroup }); // Диагностика
+    window.location.href = `/TaskEditPage/TaskEditPage.html?userId=${userId}&userName=${encodeURIComponent(userName)}&userGroup=${encodeURIComponent(userGroup)}&taskId=${taskId}&taskType=${taskType}`;
 }
 
 function handleViewSolution(e) {
     const button = e.currentTarget;
     const taskId = button.dataset.taskId;
     const userId = button.dataset.userId;
-    
-    console.log(`Просмотр решения: Task ID: ${taskId}, User ID: ${userId}`);
-    window.location.href = `/TaskSolvePage/TaskSolvePage.html?view=true&taskId=${taskId}&userId=${userId}`;
+    const taskType = button.dataset.taskType;
+
+    console.log(`Просмотр решения: Task ID: ${taskId}, User ID: ${userId}, Task Type: ${taskType}`);
+    window.location.href = `/TaskSolvePage/TaskSolvePage.html?view=true&taskId=${taskId}&userId=${userId}&taskType=${taskType}`;
 }
 
 function formatShortName(fullName) {
     if (!fullName) return 'Без имени';
-    
+
     const parts = fullName.split(' ').filter(Boolean);
-    
+
     if (parts.length >= 3) {
         return `${parts[0]} ${parts[1][0]}.${parts[2][0]}.`;
     } else if (parts.length === 2) {
@@ -202,6 +217,6 @@ function formatShortName(fullName) {
     } else if (parts.length === 1) {
         return parts[0];
     }
-    
+
     return fullName;
 }
