@@ -110,6 +110,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     if (!authtoken) {
         throw new Error('Токен авторизации отсутствует');
     }
@@ -503,6 +507,10 @@ function collectSolution() {
 
 async function submitSolution(userSolution, isTrainingMode, taskData) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     const url = isTrainingMode ? `${apiHost}/A/FifteenPuzzle/Train` : `${apiHost}/A/FifteenPuzzle/Test`;
     const body = JSON.stringify(userSolution);
 
@@ -593,6 +601,10 @@ function displaySolutionFeedback(taskData) {
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+    const refreshtoken = Cookies.get('RefreshToken')
+    if (isTokenExpired(refreshtoken)) {
+        refreshToken()
+    }
     const res = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
