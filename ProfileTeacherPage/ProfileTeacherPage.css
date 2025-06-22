@@ -60,6 +60,8 @@
 }
 
 .tasklist__header {
+    display: inline-block;
+    margin-bottom: 10px;
     font-size: clamp(20px, 4vw, 28px);
 }
 

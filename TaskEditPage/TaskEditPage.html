@@ -50,7 +50,6 @@
                 <div class="tasksettings__input-group">
                     <span>Шаблон:</span>
                     <input type="number" id="template-input" min="1" max="4" value="1">
-                    <span> [1 - 4]</span>
                 </div>
                 <div class="tasksettings__input-group">
                     <span>Максимальное значение узла:</span>
@@ -79,8 +78,8 @@
         <div class="section-admin-list__date-n-button">
             <div class="section-admin-list__finaldate">              
                 <span class="tabs__input-span">Дата завершения:</span>
-                <input type="text">
-                <button class="profile-tooltip__button-chevron"></button>
+                <input type="date" id="due-date-input">
+                <button class="profile-tooltip__button-chevron date-picker-button"></button>
             </div>
             <button class="admin-form__submit-button">Сохранить</button>
         </div>

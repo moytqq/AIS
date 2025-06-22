@@ -55,6 +55,15 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         fetchDBData();
     }
+
+    // Обработчик для кнопки выбора даты
+    const datePickerButton = document.querySelector('.date-picker-button');
+    const dueDateInput = document.querySelector('#due-date-input');
+    if (datePickerButton && dueDateInput) {
+        datePickerButton.addEventListener('click', () => {
+            dueDateInput.showPicker(); // Программно открываем календарь
+        });
+    }
 });
 
 function updateTaskInfo(taskType) {
@@ -63,7 +72,7 @@ function updateTaskInfo(taskType) {
     const taskSettings = document.querySelector('.tasksettings__content');
     const taskName = taskType === 'min-max' ? 'α & β отсечение' : 'Пятнашки A*';
     const taskDescription = taskType === 'min-max' ? 'Найти верный путь и отсекаемые узлы' : 'Решить головоломку Пятнашки с помощью A*';
-    const taskImage = taskType === 'min-max' ? '/img/alpha-beta.webp' : '/img/fifteen-puzzle.webp';
+    const taskImage = taskType === 'min-max' ? '/img/alpha-beta.webp' : '/img/FifteenPuzzle.webp';
 
     taskInfo.innerHTML = `
         <img class="taskinfo__img-task" src="${taskImage}" alt>

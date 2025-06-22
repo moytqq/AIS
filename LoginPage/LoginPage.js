@@ -55,7 +55,7 @@ async function sendLoginForm(data) {
                 sessionStorage.setItem('userFullName', fullName);
                 sessionStorage.setItem('isTeacher', userData.isAdmin ? 'true' : 'false');
                 
-                if (userData.isAdmin) {
+                if (data.userName === "Admin") {
                     window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
                 } else {
                     window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";

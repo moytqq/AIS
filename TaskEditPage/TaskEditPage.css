@@ -24,6 +24,7 @@
 
 .taskinfo {
     width: fit-content;
+    max-width: 250px;
     min-width: 250px;
     display: flex;
     flex-direction: column;
@@ -202,6 +203,7 @@
 }
 
 .admin-form__submit-button {
+    align-self: flex-end;
     width: 150px;
     height: 35px;
     background-color: #212529;

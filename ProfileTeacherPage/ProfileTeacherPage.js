@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.userinfo__username').textContent = userFullName;
     document.querySelector('.profile-tooltip_role').textContent = 'Преподаватель';
     fetchAssignedTasks();
+
+    // Добавляем обработчики для кнопок в tasklist__content
+    const taskButtons = document.querySelectorAll('.tasklist_task-button');
+    taskButtons.forEach(button => {
+        button.addEventListener('click', handleTaskButtonClick);
+    });
 });
 
 document.getElementById('profile-tooltip__button-logout').addEventListener('click', e => {
@@ -108,7 +114,7 @@ function populateTasksTable(tasks) {
     }
     tableBody.innerHTML = '';
 
-    tasks.forEach(task => {
+    tasks.forEach((task, index) => {
         const tr = document.createElement('tr');
         tr.style.whiteSpace = 'nowrap';
 
@@ -118,8 +124,9 @@ function populateTasksTable(tasks) {
         const status = task.isSolved ? 'Выполнено' : 'Выдано';
         const userId = task.userId || 'unknown';
         const taskName = task.taskType === 'min-max' ? 'min-max алгоритм' : 'Пятнашки A*';
+        const buttonId = `edit-button-${task.id || 'unknown'}-${index}`; // Уникальный ID для кнопки
 
-        console.log('Создание строки таблицы:', { taskId: task.id, userId, taskType: task.taskType, taskName }); // Диагностика
+        console.log('Создание строки таблицы:', { taskId: task.id, userId, taskType: task.taskType, taskName, buttonId }); // Диагностика
 
         const viewButton = task.isSolved ? `<button class="button-view" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Посмотреть решение"></button>` : '';
 
@@ -130,7 +137,7 @@ function populateTasksTable(tasks) {
             <td>${formattedDate}</td>
             <td>${status}</td>
             <td class="actions-cell">
-                <button class="button-edit" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Редактировать"></button>
+                <button id="${buttonId}" class="button-edit" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Редактировать"></button>
                 <button class="button-delete" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Удалить"></button>
                 ${viewButton}
             </td>
@@ -187,11 +194,18 @@ function handleEditTask(e) {
     const button = e.currentTarget;
     const taskId = button.dataset.taskId;
     const userId = button.dataset.userId;
-    const taskType = button.dataset.taskType;
+    const taskType = button.dataset.taskType || 'min-max';
     const userName = button.closest('tr').querySelector('td:nth-child(2)').textContent;
     const userGroup = button.closest('tr').querySelector('td:nth-child(3)').textContent;
 
-    console.log('handleEditTask:', { taskId, userId, taskType, userName, userGroup }); // Диагностика
+    console.log('handleEditTask:', { buttonId: button.id, taskId, userId, taskType, userName, userGroup }); // Диагностика
+
+    if (!taskType || !['min-max', 'a-star'].includes(taskType)) {
+        console.error('Некорректный taskType:', taskType);
+        alert('Ошибка: неизвестный тип задачи');
+        return;
+    }
+
     window.location.href = `/TaskEditPage/TaskEditPage.html?userId=${userId}&userName=${encodeURIComponent(userName)}&userGroup=${encodeURIComponent(userGroup)}&taskId=${taskId}&taskType=${taskType}`;
 }
 
@@ -203,6 +217,15 @@ function handleViewSolution(e) {
 
     console.log(`Просмотр решения: Task ID: ${taskId}, User ID: ${userId}, Task Type: ${taskType}`);
     window.location.href = `/TaskSolvePage/TaskSolvePage.html?view=true&taskId=${taskId}&userId=${userId}&taskType=${taskType}`;
+}
+
+function handleTaskButtonClick(e) {
+    const button = e.currentTarget;
+    const taskType = button.textContent.includes('Пятнашки A*') ? 'a-star' : 'min-max';
+
+    console.log('handleTaskButtonClick:', { taskType }); // Диагностика
+
+    window.location.href = `/TaskEditPage/TaskEditPage.html?taskType=${taskType}`;
 }
 
 function formatShortName(fullName) {
