@@ -5,6 +5,7 @@ on:
       - main
 jobs:
   dispatch:
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch update to AIC
