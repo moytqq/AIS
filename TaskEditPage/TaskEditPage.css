@@ -67,7 +67,9 @@
 .tasksettings__header {
     font-size: clamp(20px, 4vw, 32px);
 }
-
+.tasksettings__input-group-dropdown{
+    font-size: clamp(16px, 4vw, 24px);
+}
 .tasksettings__content {
     display: flex;
     flex-wrap: wrap;
