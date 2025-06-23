@@ -27,14 +27,14 @@ document.getElementById('form_login').addEventListener('submit', e => {
 
 async function sendLoginForm(data) {
     try {
-        const res = await fetch(`${apiHost}/Users/Login`, {
+        const response = await fetch(`${apiHost}/Users/Login`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         });
 
-        const result = await res.json();
-        if (res.status === 200) {
+        const result = await response.json();
+        if (response.status === 200) {
             Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
             Cookies.set('RefreshToken', result.refreshToken);
             
@@ -64,7 +64,7 @@ async function sendLoginForm(data) {
             } else {
                 throw new Error('Не удалось получить данные пользователя');
             }
-        } else if (res.status === 401 || res.status === 400) {
+        } else if (response.status === 401 || response.status === 400) {
             const errorMessage = document.getElementById('error-message');
             errorMessage.textContent = 'Неверный логин или пароль';
             errorMessage.style.display = 'block';

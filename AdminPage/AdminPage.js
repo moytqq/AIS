@@ -105,7 +105,7 @@ async function checkIfUserExists(userId) {
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
@@ -131,19 +131,19 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
 
-    const res = await fetch(`${apiHost}/Users/Logout`, {
+    const response = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${authtoken}`
         }
     });
-    if (responce.status === 401) {
+    if (response.status === 401) {
         const refreshtoken = Cookies.get('RefreshToken');
         if (isTokenExpired(authtoken)) {
             refreshToken();
         }
     }
-    if (res.status === 200) {
+    if (response.status === 200) {
         sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
     }
@@ -228,7 +228,7 @@ async function addUser(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
 
     try {
-        const res = await fetch(`${apiHost}/Users/Register`, {
+        const response = await fetch(`${apiHost}/Users/Register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -236,18 +236,18 @@ async function addUser(data) {
             },
             body: JSON.stringify(data)
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
             }
         }
-        if (res.status === 200) {
+        if (response.status === 200) {
             alert('Пользователь добавлен');
             document.getElementById("id_groupName-of-user").value = '';
             fetchDBData();
-        } else if (res.status === 400) {
-            const errorData = await res.json();
+        } else if (response.status === 400) {
+            const errorData = await response.json();
             alert(`Ошибка: Пользователь с логином "${data.userName}" уже существует`);
         } else {
             alert('Ошибка при добавлении пользователя');
@@ -272,26 +272,26 @@ async function addGroup(groupName) {
 
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
 
-    const res = await fetch(`${apiHost}/Users/Groups?groupName=` + groupName, {
+    const response = await fetch(`${apiHost}/Users/Groups?groupName=` + groupName, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authtoken}`
         },
     });
-    if (responce.status === 401) {
+    if (response.status === 401) {
         const refreshtoken = Cookies.get('RefreshToken');
         if (isTokenExpired(authtoken)) {
             refreshToken();
         }
     }
-    if (res.ok) {
+    if (response.ok) {
         document.getElementById("id_groupName-of-user").value = '';
         alert('Группа успешно добавлена');
         await Promise.all([fetchDBData(), setupGroupDropdowns()]);
         return true;
     } else {
-        const errorData = await res.json();
+        const errorData = await response.json();
         alert(errorData.message || 'Ошибка при добавлении группы');
         return false;
     }
@@ -342,7 +342,7 @@ async function fetchDBData() {
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
@@ -399,7 +399,7 @@ async function deleteRecord(id) {
                 Authorization: `Bearer ${authtoken}`,
             }
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
@@ -423,7 +423,7 @@ async function editRecord(id) {
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
@@ -457,7 +457,7 @@ async function putUser(data) {
             },
             body: form_data
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
@@ -485,7 +485,7 @@ async function fetchGroups() {
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();

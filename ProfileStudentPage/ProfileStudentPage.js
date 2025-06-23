@@ -35,18 +35,18 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const res = await fetch(`${apiHost}/Users/Logout`, {
+        const response = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${authtoken}`
             }
         });
 
-        if (res.status === 200) {
+        if (response.status === 200) {
             sessionStorage.removeItem('userFullName');
             window.location.href = "/LoginPage/LoginPage.html";
         } 
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();

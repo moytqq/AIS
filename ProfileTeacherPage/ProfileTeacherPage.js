@@ -22,20 +22,20 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const responce = await fetch(`${apiHost}/Users/Logout`, {
+        const response = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${authtoken}`
             }
         });
-        if (responce.status === 200) {
+        if (response.status === 200) {
             sessionStorage.removeItem('userFullName');
             window.location.href = "/LoginPage/LoginPage.html";
         } else {
-            console.error('Ошибка выхода:', res.status, res.statusText);
+            console.error('Ошибка выхода:', response.status, response.statusText);
             alert('Не удалось выйти из системы');
         }
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
@@ -196,7 +196,7 @@ async function handleDeleteTask(e) {
         } else {
             throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
         }
-        if (responce.status === 401) {
+        if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
