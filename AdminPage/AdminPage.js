@@ -97,10 +97,7 @@ async function checkIfUserExists(userId) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
+
         const response = await fetch(`${apiHost}/Users/${userId}`, {
             method: 'GET',
             headers: {
@@ -108,6 +105,12 @@ async function checkIfUserExists(userId) {
                 Authorization: `Bearer ${authtoken}`
             },
         });
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         return response.status === 200;
     } catch (error) {
         console.error('Ошибка проверки существования пользователя:', error);
@@ -127,17 +130,19 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
+
     const res = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${authtoken}`
         }
     });
-
+    if (responce.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
+    }
     if (res.status === 200) {
         sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
@@ -221,10 +226,7 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
 
 async function addUser(data) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
+
     try {
         const res = await fetch(`${apiHost}/Users/Register`, {
             method: 'POST',
@@ -234,7 +236,12 @@ async function addUser(data) {
             },
             body: JSON.stringify(data)
         });
-
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         if (res.status === 200) {
             alert('Пользователь добавлен');
             document.getElementById("id_groupName-of-user").value = '';
@@ -264,10 +271,7 @@ async function addGroup(groupName) {
     }
 
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
+
     const res = await fetch(`${apiHost}/Users/Groups?groupName=` + groupName, {
         method: 'POST',
         headers: {
@@ -275,7 +279,12 @@ async function addGroup(groupName) {
             Authorization: `Bearer ${authtoken}`
         },
     });
-
+    if (responce.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
+    }
     if (res.ok) {
         document.getElementById("id_groupName-of-user").value = '';
         alert('Группа успешно добавлена');
@@ -326,10 +335,6 @@ async function deleteGroup(groupId) {
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
         const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
             headers: {
@@ -337,6 +342,12 @@ async function fetchDBData() {
                 Authorization: `Bearer ${authtoken}`
             },
         });
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         const data = await response.json();
         populateTable(data);
         return data;
@@ -381,10 +392,6 @@ function populateTable(data) {
 async function deleteRecord(id) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
         const response = await fetch(`${apiHost}/Users?userId=` + id, {
             method: 'DELETE',
             headers: {
@@ -392,6 +399,12 @@ async function deleteRecord(id) {
                 Authorization: `Bearer ${authtoken}`,
             }
         });
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         alert('Запись успешно удалена');
         fetchDBData();
     } catch (error) {
@@ -403,10 +416,6 @@ async function deleteRecord(id) {
 async function editRecord(id) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
         const response = await fetch(`${apiHost}/Users/${id}`, {
             method: 'GET',
             headers: {
@@ -414,6 +423,12 @@ async function editRecord(id) {
                 Authorization: `Bearer ${authtoken}`
             },
         });
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         var userdata = await response.json();
     } catch (error) {
         console.error('Ошибка при получении данных:', error);
@@ -434,10 +449,7 @@ async function putUser(data) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
+
         const response = await fetch(`${apiHost}/Users?userId=${data.userId}`, {
             method: 'PUT',
             headers: {
@@ -445,6 +457,12 @@ async function putUser(data) {
             },
             body: form_data
         });
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         if (response.status == 200) {
             alert('Запись успешно изменена');
         } else {
@@ -460,10 +478,6 @@ async function putUser(data) {
 async function fetchGroups() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
         const response = await fetch(`${apiHost}/Users/Groups`, {
             method: 'GET',
             headers: {
@@ -471,6 +485,12 @@ async function fetchGroups() {
                 Authorization: `Bearer ${authtoken}`
             },
         });
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         return await response.json();
     } catch (error) {
         console.error('Ошибка при получении списка групп:', error);

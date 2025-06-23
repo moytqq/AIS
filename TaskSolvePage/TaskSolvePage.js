@@ -136,10 +136,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
+
     let url;
     let response;
 
@@ -164,7 +161,12 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, setting
         if (!response.ok) {
             throw new Error(`Ошибка при получении тренировочной задачи: ${response.status} ${response.statusText}`);
         }
-
+        if (response.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         const data = await response.json();
         if (!data.head) {
             throw new Error('Данные задачи отсутствуют в ответе');
@@ -539,10 +541,7 @@ async function submitSolution(userSolution, isTrainingMode, problem) {
     }
     
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
+
     const url = isTrainingMode ? `${apiHost}/AB/Train` : `${apiHost}/AB/Test`;
     const body = isTrainingMode ? JSON.stringify({ head: problem.head, nodes: userSolution.nodes, path: userSolution.path }) : JSON.stringify({
         nodes: userSolution.nodes,
@@ -563,7 +562,12 @@ async function submitSolution(userSolution, isTrainingMode, problem) {
         console.error('Ошибка сервера:', response.status, errorText);
         throw new Error(`Ошибка при отправке решения: ${response.status} ${errorText}`);
     }
-    
+    if (response.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
+    }
     const responseData = await response.json();
     console.log('Ответ сервера:', responseData);
     
@@ -974,20 +978,23 @@ function convertInputValue(value) {
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
-    const res = await fetch(`${apiHost}/Users/Logout`, {
+
+    const responce = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${authtoken}`
         }
     });
 
-    if (res.status === 200) {
+    if (responce.status === 200) {
         sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
+    }
+    if (responce.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
     }
 }
 

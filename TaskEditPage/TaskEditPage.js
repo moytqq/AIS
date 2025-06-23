@@ -121,30 +121,30 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
-    if (isTokenExpired(authtoken)) {
-        refreshToken()
-    }
-    const res = await fetch(`${apiHost}/Users/Logout`, {
+
+    const responce = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${authtoken}`
         }
     });
 
-    if (res.status === 200) {
+    if (responce.status === 200) {
         sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
+    }
+    if (responce.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
     }
 }
 
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
+
         const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
             headers: {
@@ -157,6 +157,12 @@ async function fetchDBData() {
         return data;
     } catch (error) {
         console.error('Ошибка при получении данных:', error);
+    }
+    if (responce.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
     }
 }
 
@@ -219,10 +225,6 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
 
         if (editTaskType === 'min-max') {
             const treeHeight = document.getElementById('tree-height-input').value;
@@ -243,6 +245,12 @@ document.querySelector('.admin-form__submit-button').addEventListener('click', a
                     window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
                 } else {
                     throw new Error('Ошибка при обновлении задания');
+                }
+                if (response.status === 401) {
+                    const refreshtoken = Cookies.get('RefreshToken');
+                    if (isTokenExpired(authtoken)) {
+                        refreshToken();
+                    }
                 }
             } else {
                 const response = await fetch(`${apiHost}/AB/Users/Assign?treeHeight=${parseInt(treeHeight)}&max=${parseInt(max)}&template=${parseInt(template)}`, {

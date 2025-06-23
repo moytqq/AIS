@@ -95,10 +95,6 @@ function displayHeuristicName(heuristic) {
 
 async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken');
-    if (isTokenExpired(authtoken)) {
-        refreshToken();
-    }
     if (!authtoken) {
         throw new Error('Токен авторизации отсутствует');
     }
@@ -135,7 +131,12 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, setting
             const errorText = await response.text();
             throw new Error(`Ошибка HTTP: ${response.status} ${errorText}`);
         }
-
+        if (response.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         const data = await response.json();
         console.log('Ответ API:', data);
 
@@ -490,10 +491,7 @@ function collectSolution() {
 
 async function submitSolution(userSolution, isTrainingMode, taskData) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken');
-    if (isTokenExpired(authtoken)) {
-        refreshToken();
-    }
+
     let url = isTrainingMode ? `${apiHost}/A/FifteenPuzzle/Train` : `${apiHost}/A/FifteenPuzzle/Test`;
     if (isTrainingMode) {
         const heuristic = taskData.settings?.heuristic || 1;
@@ -517,7 +515,12 @@ async function submitSolution(userSolution, isTrainingMode, taskData) {
             const errorText = await response.text();
             throw new Error(`Ошибка при отправке решения: ${response.status} ${errorText}`);
         }
-
+        if (response.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         return await response.json();
     } catch (error) {
         console.error('Ошибка в submitSolution:', error);
@@ -592,20 +595,22 @@ function displaySolutionFeedback(taskData) {
 
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken');
-    if (isTokenExpired(authtoken)) {
-        refreshToken();
-    }
-    const res = await fetch(`${apiHost}/Users/Logout`, {
+    const responce = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${authtoken}`
         }
     });
 
-    if (res.status === 200) {
+    if (responce.status === 200) {
         sessionStorage.removeItem('userFullName');
         window.location.href = "/LoginPage/LoginPage.html";
+    }
+    if (responce.status === 401) {
+        const refreshtoken = Cookies.get('RefreshToken');
+        if (isTokenExpired(authtoken)) {
+            refreshToken();
+        }
     }
 }
 

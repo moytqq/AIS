@@ -22,22 +22,24 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
-        const res = await fetch(`${apiHost}/Users/Logout`, {
+        const responce = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${authtoken}`
             }
         });
-        if (res.status === 200) {
+        if (responce.status === 200) {
             sessionStorage.removeItem('userFullName');
             window.location.href = "/LoginPage/LoginPage.html";
         } else {
             console.error('Ошибка выхода:', res.status, res.statusText);
             alert('Не удалось выйти из системы');
+        }
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
         }
     } catch (error) {
         console.error('Ошибка при выходе:', error);
@@ -48,10 +50,7 @@ async function Logout() {
 async function fetchAssignedTasks() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
+
         if (!authtoken) {
             throw new Error('Токен авторизации отсутствует');
         }
@@ -80,7 +79,12 @@ async function fetchAssignedTasks() {
         if (!aStarResponse.ok) {
             throw new Error(`Ошибка HTTP (A*): ${aStarResponse.status} ${aStarResponse.statusText}`);
         }
-
+        if (minMaxResponse.status === 401 || aStarResponse.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
+        }
         const minMaxTasks = await minMaxResponse.json();
         const aStarTasks = await aStarResponse.json();
 
@@ -177,10 +181,6 @@ async function handleDeleteTask(e) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
-        if (isTokenExpired(authtoken)) {
-            refreshToken()
-        }
         const endpoint = taskType === 'min-max' ? `${apiHost}/AB/Users/${userId}` : `${apiHost}/A/FifteenPuzzle/Users/${userId}`;
         const response = await fetch(endpoint, {
             method: 'DELETE',
@@ -195,6 +195,12 @@ async function handleDeleteTask(e) {
             button.closest('tr').remove();
         } else {
             throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
+        }
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
         }
     } catch (error) {
         console.error('Ошибка при удалении:', error);

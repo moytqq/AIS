@@ -35,10 +35,6 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken');
-        if (isTokenExpired(authtoken)) {
-            refreshToken();
-        }
         const res = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
             headers: {
@@ -49,9 +45,12 @@ async function Logout() {
         if (res.status === 200) {
             sessionStorage.removeItem('userFullName');
             window.location.href = "/LoginPage/LoginPage.html";
-        } else {
-            console.error('Ошибка выхода:', res.status, res.statusText);
-            alert('Не удалось выйти из системы');
+        } 
+        if (responce.status === 401) {
+            const refreshtoken = Cookies.get('RefreshToken');
+            if (isTokenExpired(authtoken)) {
+                refreshToken();
+            }
         }
     } catch (error) {
         console.error('Ошибка при выходе:', error);
@@ -62,10 +61,6 @@ async function Logout() {
 async function fetchAssignedTasks(specificTaskType = null) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken');
-        if (isTokenExpired(authtoken)) {
-            refreshToken();
-        }
         const tasks = [];
 
         if (!specificTaskType || specificTaskType === 'min-max') {
@@ -80,7 +75,13 @@ async function fetchAssignedTasks(specificTaskType = null) {
             if (minMaxResponse.ok) {
                 const taskData = await minMaxResponse.json();
                 tasks.push({ ...taskData, taskType: 'min-max' });
-            } else if (minMaxResponse.status !== 404) {
+            }else    if (minMaxResponse.status === 401) {
+                const refreshtoken = Cookies.get('RefreshToken');
+                if (isTokenExpired(authtoken)) {
+                    refreshToken();
+                }
+            } 
+            else if (minMaxResponse.status !== 404) {
                 throw new Error(`Ошибка HTTP (Min-Max): ${minMaxResponse.status}`);
             }
         }
@@ -97,7 +98,13 @@ async function fetchAssignedTasks(specificTaskType = null) {
             if (aStarResponse.ok) {
                 const taskData = await aStarResponse.json();
                 tasks.push({ ...taskData, taskType: 'a-star' });
-            } else if (aStarResponse.status !== 404) {
+            }else    if (aStarResponse.status === 401) {
+                const refreshtoken = Cookies.get('RefreshToken');
+                if (isTokenExpired(authtoken)) {
+                    refreshToken();
+                } 
+            }
+            else if (aStarResponse.status !== 404) {
                 throw new Error(`Ошибка HTTP (A*): ${aStarResponse.status}`);
             }
         }
