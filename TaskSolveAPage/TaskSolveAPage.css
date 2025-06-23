@@ -81,7 +81,58 @@
     padding: 2px;
     margin-bottom: 10px;
 }
-
+.level-1 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #4CAF50;
+}
+.level-2 .tree-node::after {
+    display: none;
+    content: 'MAX';
+    background: #ff9800;
+}
+.level-3 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+.level-4 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+.level-5 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+.level-6 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+.level-7 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+.level-8 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+.level-9 .tree-node::after {
+    display: none;
+    content: 'MIN';
+    background: #9c27b0;
+}
+#heuristic-name {
+    font-size: clamp(16px, 3vw, 20px);
+    font-weight: 500;
+}
+.tasksettings__input-group-dropdown{
+    font-size: clamp(16px, 4vw, 24px);
+}
 .puzzle-tile {
     width: 50px;
     height: 50px;

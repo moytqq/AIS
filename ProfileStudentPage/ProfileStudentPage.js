@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (taskType === 'ab-test') {
                 fetchAssignedTasks('min-max');
             } else if (taskType === 'a-star') {
-                fetchAssignedTasks('a-star');
+                window.location.href = `/TaskSolveAPage/TaskSolveAPage.html?taskType=train`;
             }
         });
     });
@@ -35,9 +35,9 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
 async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
+        const refreshtoken = Cookies.get('RefreshToken');
         if (isTokenExpired(authtoken)) {
-            refreshToken()
+            refreshToken();
         }
         const res = await fetch(`${apiHost}/Users/Logout`, {
             method: 'POST',
@@ -62,13 +62,12 @@ async function Logout() {
 async function fetchAssignedTasks(specificTaskType = null) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const refreshtoken = Cookies.get('RefreshToken')
+        const refreshtoken = Cookies.get('RefreshToken');
         if (isTokenExpired(authtoken)) {
-            refreshToken()
+            refreshToken();
         }
         const tasks = [];
 
-        // Fetch Min-Max task if not restricted to a-star
         if (!specificTaskType || specificTaskType === 'min-max') {
             const minMaxResponse = await fetch(`${apiHost}/AB/Test`, {
                 method: 'GET',
@@ -85,7 +84,7 @@ async function fetchAssignedTasks(specificTaskType = null) {
                 throw new Error(`Ошибка HTTP (Min-Max): ${minMaxResponse.status}`);
             }
         }
-        // Fetch A* task if not restricted to min-max
+
         if (!specificTaskType || specificTaskType === 'a-star') {
             const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Test`, {
                 method: 'GET',
@@ -103,7 +102,7 @@ async function fetchAssignedTasks(specificTaskType = null) {
             }
         }
 
-        console.log('Полученные задания:', tasks); // Диагностика
+        console.log('Полученные задания:', tasks);
         populateTasksTable(tasks);
     } catch (error) {
         console.error('Ошибка в fetchAssignedTasks:', error);

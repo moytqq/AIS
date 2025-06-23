@@ -39,6 +39,7 @@
         <div class="section-tasksolve__taskinfo">
           <span class="section-tasksolve__task-name" id="task-name">Пятнашки A*</span>
           <span class="section-tasksolve__task-description" id="task-description">Решите задачу пятнашек с использованием алгоритма A*. Раскройте узлы в правильном порядке, заполните значения h, f, g.</span>
+          <div id="heuristic-name"></div>
           <div class="student-info" id="student-info"></div>
           <div class="training-mode" id="training-mode">Режим тренировки</div>
         </div>
@@ -57,13 +58,13 @@
             </div>
             <div class="tasksettings__input-group">
               <span>Эвристика:</span>
-              <select id="heuristic-input">
+              <select class="tasksettings__input-group-dropdown" id="heuristic-input">
                 <option value="1">Расстояние Хемминга</option>
                 <option value="2">Манхэттенское расстояние</option>
               </select>
             </div>
           </div>
-          <button type="button" class="tasksolve-form__update-button" id="apply-settings" style="display: none;">Применить</button>
+          <button type="button" class="tasksolve-form__update-button" id="apply-settings" style="display: none;"></button>
         </div>
       </div>
       <form class="section-tasksolve__task-display">

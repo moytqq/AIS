@@ -54,6 +54,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             studentInfo.textContent = `Студент: ${taskData.originalData.user.name} ${taskData.originalData.user.secondName} ${taskData.originalData.user.patronymic}`;
         }
 
+        // Отображение названия эвристики
+        displayHeuristicName(taskData.settings ? taskData.settings.heuristic : 1);
+
         window.taskData = taskData;
         window.openOrder = [];
         renderTree(taskData.problem, isViewMode);
@@ -66,9 +69,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             else if (taskData.isSolved && submitButton) submitButton.style.display = 'block';
             const solutionMessage = document.getElementById('solution-message');
             if (solutionMessage) solutionMessage.style.display = 'block';
-            if (taskData.userSolution) {
+            if (taskData.userSolution && taskData.userSolution.length > 0) {
                 displaySolutionFeedback(taskData);
-                // Восстанавливаем значения из userSolution
                 taskData.userSolution.forEach(({ id, h, f, g }) => {
                     const inputs = document.querySelectorAll(`.heuristic-input[data-node-id="${id}"]`);
                     inputs.forEach(input => {
@@ -77,28 +79,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                         if (input.dataset.param === 'g') input.value = g || '';
                     });
                 });
-                // Восстанавливаем раскрытые узлы (используем solution.openOrder как резерв)
-                const openOrder = taskData.userSolution.openOrder && Array.isArray(taskData.userSolution.openOrder)
-                    ? taskData.userSolution.openOrder
-                    : taskData.solution
-                        ? taskData.solution
-                            .filter(s => s.openOrder >= 0)
-                            .map(s => s.id)
-                        : [];
-                if (openOrder.length > 0) {
-                    console.log('Попытка раскрытия узлов с openOrder:', openOrder);
-                    openOrder.forEach(nodeId => {
-                        const node = taskData.problem.find(n => n.id === nodeId);
-                        if (node) {
-                            console.log(`Раскрытие узла с ID ${nodeId}, depth: ${node.depth}`);
-                            toggleChildren(nodeId, node.depth, true);
-                        } else {
-                            console.warn(`Узел с ID ${nodeId} не найден для раскрытия`);
-                        }
-                    });
-                } else {
-                    console.warn('openOrder отсутствует или пуст:', taskData.userSolution.openOrder);
-                }
             }
         }
     } catch (error) {
@@ -108,11 +88,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
+function displayHeuristicName(heuristic) {
+    const heuristicNameElement = document.getElementById('heuristic-name');
+    if (heuristicNameElement) {
+        heuristicNameElement.textContent = heuristic === 2 ? 'Эвристика: Манхэттенское расстояние' : 'Эвристика: Расстояние Хемминга';
+    }
+}
+
 async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, settings = null) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
+    const refreshtoken = Cookies.get('RefreshToken');
     if (isTokenExpired(authtoken)) {
-        refreshToken()
+        refreshToken();
     }
     if (!authtoken) {
         throw new Error('Токен авторизации отсутствует');
@@ -154,28 +141,26 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, setting
         const data = await response.json();
         console.log('Ответ API:', data);
 
-        // Форматирование данных для соответствия формату /Test
         let formattedData = data;
-        if (isViewMode && data.task) {
+        if (isTrainingMode) {
+            formattedData = {
+                problem: data,
+                solution: [],
+                userSolution: [],
+                isSolved: false,
+                settings: settings || { heuristic: 1 }
+            };
+        } else if (isViewMode && data.task) {
             formattedData = {
                 problem: data.task.problem,
                 solution: data.task.solution || [],
-                userSolution: data.task.userSolution || [],
+                userSolution: data.task.userSolution && data.task.userSolution.heuristicValues 
+                    ? data.task.userSolution.heuristicValues 
+                    : data.task.userSolution || [],
                 isSolved: data.task.isSolved,
                 date: data.task.date,
-                originalData: data // Сохраняем оригинальные данные для имени студента
+                originalData: data
             };
-            // Обработка openOrder
-            if (data.task.userSolution && data.task.userSolution.openOrder) {
-                if (Array.isArray(data.task.userSolution.openOrder)) {
-                    formattedData.userSolution.openOrder = data.task.userSolution.openOrder;
-                } else {
-                    console.warn('openOrder не является массивом, игнорируется:', data.task.userSolution.openOrder);
-                    formattedData.userSolution.openOrder = [];
-                }
-            } else {
-                formattedData.userSolution.openOrder = [];
-            }
         } else if (!data.problem || !Array.isArray(data.problem) || data.problem.length === 0) {
             throw new Error('Данные задачи отсутствуют или имеют неверный формат');
         }
@@ -267,7 +252,6 @@ function renderTree(nodes, isViewMode) {
                 }
             });
 
-            // Добавляем кликабельность для всех режимов
             nodeElement.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('heuristic-input')) {
                     console.log(`Клик на узел с ID ${node.id}, depth: ${level}`);
@@ -323,11 +307,6 @@ function createNodeElement(node, level, isViewMode) {
         inputsContainer.appendChild(inputGroup);
     });
 
-    // const idLabel = document.createElement('div');
-    // idLabel.className = 'node-id';
-    // idLabel.textContent = `ID: ${node.id}`;
-
-    nodeElement.appendChild(idLabel);
     nodeElement.appendChild(board);
     nodeElement.appendChild(inputsContainer);
 
@@ -446,6 +425,7 @@ function setupEventListeners(taskData, isViewMode, isTrainingMode) {
                 renderTree(newTaskData.problem, isViewMode);
                 setupEventListeners(newTaskData, isViewMode, isTrainingMode);
                 document.getElementById('solution-message').style.display = 'none';
+                displayHeuristicName(heuristic);
             } catch (error) {
                 alert(`Не удалось применить настройки: ${error.message}`);
             }
@@ -480,15 +460,12 @@ function validateSolution(userSolution, nodes) {
 }
 
 function collectSolution() {
-    const solution = window.openOrder.map(nodeId => {
-        const node = window.taskData.problem.find(n => n.id === nodeId);
-        return {
-            id: nodeId,
-            g: 0,
-            h: 0,
-            f: 0
-        };
-    });
+    const solution = window.openOrder.map(nodeId => ({
+        id: nodeId,
+        g: 0,
+        h: 0,
+        f: 0
+    }));
 
     document.querySelectorAll('.heuristic-input').forEach(input => {
         const nodeId = parseInt(input.dataset.nodeId);
@@ -496,9 +473,7 @@ function collectSolution() {
         const value = parseInt(input.value) || 0;
         const node = solution.find(s => s.id === nodeId);
         if (node && window.openOrder.includes(nodeId)) {
-            if (param === 'g') node.g = value;
-            if (param === 'h') node.h = value;
-            if (param === 'f') node.f = value;
+            node[param] = value;
         }
     });
 
@@ -507,12 +482,14 @@ function collectSolution() {
 
 async function submitSolution(userSolution, isTrainingMode, taskData) {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
+    const refreshtoken = Cookies.get('RefreshToken');
     if (isTokenExpired(authtoken)) {
-        refreshToken()
+        refreshToken();
     }
     const url = isTrainingMode ? `${apiHost}/A/FifteenPuzzle/Train` : `${apiHost}/A/FifteenPuzzle/Test`;
-    const body = JSON.stringify(userSolution);
+    const body = isTrainingMode ? JSON.stringify(taskData.problem) : JSON.stringify(userSolution);
+
+    console.log('Отправка решения:', body);
 
     try {
         const response = await fetch(url, {
@@ -598,12 +575,11 @@ function displaySolutionFeedback(taskData) {
         messageElement.innerHTML = 'Найдены ошибки в значениях (h, g, f) или раскрытии узлов.';
     }
 }
-
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const refreshtoken = Cookies.get('RefreshToken')
+    const refreshtoken = Cookies.get('RefreshToken');
     if (isTokenExpired(authtoken)) {
-        refreshToken()
+        refreshToken();
     }
     const res = await fetch(`${apiHost}/Users/Logout`, {
         method: 'POST',
