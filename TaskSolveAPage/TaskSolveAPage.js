@@ -48,13 +48,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         console.log('Полученные данные задачи:', taskData);
 
-        // Отображение имени студента (если доступно)
         if (isViewMode && taskData.originalData && taskData.originalData.user && taskData.originalData.user.name) {
             const studentInfo = document.getElementById('student-info');
             studentInfo.textContent = `Студент: ${taskData.originalData.user.name} ${taskData.originalData.user.secondName} ${taskData.originalData.user.patronymic}`;
         }
 
-        // Отображение названия эвристики
         displayHeuristicName(taskData.settings ? taskData.settings.heuristic : 1);
 
         window.taskData = taskData;
@@ -460,19 +458,29 @@ function validateSolution(userSolution, nodes) {
 }
 
 function collectSolution() {
-    const solution = window.openOrder.map(nodeId => ({
-        id: nodeId,
-        g: 0,
-        h: 0,
-        f: 0
-    }));
+    const solution = [];
+    const visibleNodes = document.querySelectorAll('.tree-node');
+    
+    visibleNodes.forEach(node => {
+        const nodeId = parseInt(node.dataset.nodeId);
+        const levelContainer = node.closest('.tree-level');
+        if (levelContainer && getComputedStyle(levelContainer).display !== 'none') {
+            const nodeSolution = {
+                id: nodeId,
+                g: 0,
+                h: 0,
+                f: 0
+            };
+            solution.push(nodeSolution);
+        }
+    });
 
     document.querySelectorAll('.heuristic-input').forEach(input => {
         const nodeId = parseInt(input.dataset.nodeId);
         const param = input.dataset.param;
         const value = parseInt(input.value) || 0;
         const node = solution.find(s => s.id === nodeId);
-        if (node && window.openOrder.includes(nodeId)) {
+        if (node) {
             node[param] = value;
         }
     });
@@ -486,10 +494,14 @@ async function submitSolution(userSolution, isTrainingMode, taskData) {
     if (isTokenExpired(authtoken)) {
         refreshToken();
     }
-    const url = isTrainingMode ? `${apiHost}/A/FifteenPuzzle/Train` : `${apiHost}/A/FifteenPuzzle/Test`;
+    let url = isTrainingMode ? `${apiHost}/A/FifteenPuzzle/Train` : `${apiHost}/A/FifteenPuzzle/Test`;
+    if (isTrainingMode) {
+        const heuristic = taskData.settings?.heuristic || 1;
+        url += `?heuristic=${heuristic}`;
+    }
     const body = isTrainingMode ? JSON.stringify(taskData.problem) : JSON.stringify(userSolution);
 
-    console.log('Отправка решения:', body);
+    console.log('Отправка решения:', { url, body });
 
     try {
         const response = await fetch(url, {
@@ -518,9 +530,10 @@ function displaySolutionFeedback(taskData) {
     messageElement.style.display = 'block';
     messageElement.innerHTML = '';
 
-    const userSolution = taskData.userSolution;
+    const userSolution = taskData.userSolution || [];
     const correctSolution = taskData.solution || [];
     let isCorrect = true;
+    let errorCounts = { h: 0, f: 0, g: 0 };
 
     document.querySelectorAll('.heuristic-input').forEach(input => {
         input.classList.remove('error', 'success');
@@ -529,39 +542,40 @@ function displaySolutionFeedback(taskData) {
 
     correctSolution.forEach(correctNode => {
         const nodeElement = document.querySelector(`.tree-node[data-node-id="${correctNode.id}"]`);
+        const userNode = userSolution.find(u => u.id === correctNode.id);
+
         if (nodeElement) {
             nodeElement.classList.add('correct-node');
-            const userNode = userSolution.find(u => u.id === correctNode.id);
-            const inputs = document.querySelectorAll(`.heuristic-input[data-node-id="${correctNode.id}"]`);
-            inputs.forEach(input => {
-                const param = input.dataset.param;
-                const correctValue = correctNode[param];
-                const userValue = userNode ? userNode[param] : 0;
-                if (parseInt(userValue) === correctValue) {
-                    input.classList.add('success');
-                } else {
-                    input.classList.add('error');
-                    isCorrect = false;
+            ['h', 'f', 'g'].forEach(param => {
+                const input = document.querySelector(`.heuristic-input[data-node-id="${correctNode.id}"][data-param="${param}"]`);
+                if (input) {
+                    const correctValue = correctNode[param];
+                    const userValue = userNode ? userNode[param] : 0;
+                    if (parseInt(userValue) === correctValue) {
+                        input.classList.add('success');
+                    } else {
+                        input.classList.add('error');
+                        errorCounts[param]++;
+                        isCorrect = false;
+                    }
                 }
             });
         }
     });
 
-    const allNodes = document.querySelectorAll('.tree-node');
-    allNodes.forEach(node => {
-        const nodeId = parseInt(node.dataset.nodeId);
-        if (!correctSolution.some(c => c.id === nodeId)) {
-            node.classList.add('error-node');
-            const inputs = document.querySelectorAll(`.heuristic-input[data-node-id="${nodeId}"]`);
-            inputs.forEach(input => input.classList.add('error'));
-            isCorrect = false;
-        }
-    });
-
-    correctSolution.forEach(correctNode => {
-        const nodeElement = document.querySelector(`.tree-node[data-node-id="${correctNode.id}"]`);
-        if (!nodeElement) {
-            isCorrect = false;
+    userSolution.forEach(userNode => {
+        const correctNode = correctSolution.find(c => c.id === userNode.id);
+        const nodeElement = document.querySelector(`.tree-node[data-node-id="${userNode.id}"]`);
+        if (!correctNode && nodeElement) {
+            nodeElement.classList.add('error-node');
+            ['h', 'f', 'g'].forEach(param => {
+                const input = document.querySelector(`.heuristic-input[data-node-id="${userNode.id}"][data-param="${param}"]`);
+                if (input) {
+                    input.classList.add('error');
+                    errorCounts[param]++;
+                    isCorrect = false;
+                }
+            });
         }
     });
 
@@ -572,9 +586,10 @@ function displaySolutionFeedback(taskData) {
     } else {
         messageElement.classList.remove('success');
         messageElement.classList.add('error');
-        messageElement.innerHTML = 'Найдены ошибки в значениях (h, g, f) или раскрытии узлов.';
+        messageElement.innerHTML = `Найдены ошибки: ${errorCounts.h} неверных значений h, ${errorCounts.f} неверных значений f, ${errorCounts.g} неверных значений g.`;
     }
 }
+
 async function Logout() {
     const authtoken = Cookies.get('.AspNetCore.Identity.Application');
     const refreshtoken = Cookies.get('RefreshToken');
