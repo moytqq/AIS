@@ -253,13 +253,11 @@ async function fetchTaskData(taskId, userId, isViewMode, isTrainingMode, setting
 }
 
 function resetEventListeners(isViewMode = false, isTrainingMode = false) {
-    // Удаляем существующие обработчики событий, чтобы избежать дублирования
     const submitButton = document.getElementById('submit-solution');
     const applySettingsButton = document.getElementById('apply-settings');
     const taskDisplay = document.querySelector('.section-tasksolve__task-display');
     const logoutButton = document.getElementById('profile-tooltip__button-logout');
     
-    // Клонируем элементы, чтобы удалить старые обработчики
     if (submitButton) {
         const newSubmitButton = submitButton.cloneNode(true);
         submitButton.parentNode.replaceChild(newSubmitButton, submitButton);
@@ -273,7 +271,6 @@ function resetEventListeners(isViewMode = false, isTrainingMode = false) {
         taskDisplay.parentNode.replaceChild(newTaskDisplay, taskDisplay);
     }
     
-    // Устанавливаем новые обработчики
     if (!isViewMode) {
         document.getElementById('submit-solution').addEventListener('click', async function() {
             const userSolution = collectSolution();
@@ -338,7 +335,7 @@ function resetEventListeners(isViewMode = false, isTrainingMode = false) {
                         max: parseInt(max),
                         template: parseInt(template)
                     };
-                    taskData = await fetchTaskData(null, null, false, true, settings); // Обновляем taskData
+                    taskData = await fetchTaskData(null, null, false, true, settings);
                     if (!taskData || !taskData.problem) {
                         throw new Error('Не удалось получить новое задание');
                     }
@@ -350,7 +347,7 @@ function resetEventListeners(isViewMode = false, isTrainingMode = false) {
                     }
 
                     renderTree(taskData.problem.head, null, 0, null, null, false);
-                    resetEventListeners(isViewMode, isTrainingMode); // Перерегистрируем обработчики с новым taskData
+                    resetEventListeners(isViewMode, isTrainingMode);
                 } catch (error) {
                     console.error('Ошибка применения настроек:', error);
                     alert(`Не удалось применить настройки: ${error.message}`);

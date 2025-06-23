@@ -1,6 +1,5 @@
 @import url('/TaskSolvePage/TaskSolvePage.css');
 
-/* Основные стили */
 .tree-container {
     display: flex;
     flex-direction: column;
@@ -46,7 +45,7 @@
     gap: 30px;
     margin: 20px 0;
     min-height: 220px;
-    width: auto; /* Убираем фиксированную ширину для адаптации */
+    width: auto;
 }
 
 .tree-node {
@@ -189,7 +188,6 @@
     position: relative;
 }
 
-/* Медиа-запросы для адаптивности */
 @media (max-width: 768px) {
     .tree-node {
         min-width: 180px;
@@ -230,7 +228,6 @@
     }
 }
 
-/* Дополнительные стили для отображения имени студента */
 #student-info {
     font-size: 24px;
     font-weight: bold;

@@ -25,9 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
     editTaskType = urlParams.get('taskType') || 'min-max';
     isEditMode = !!editUserId;
 
-    console.log('TaskEditPage: taskType=', editTaskType, 'isEditMode=', isEditMode); // Диагностика
+    console.log('TaskEditPage: taskType=', editTaskType, 'isEditMode=', isEditMode);
 
-    // Вызываем updateTaskInfo для немедленного отображения правильной задачи
     updateTaskInfo(editTaskType);
 
     if (isEditMode) {
@@ -56,18 +55,18 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchDBData();
     }
 
-    // Обработчик для кнопки выбора даты
+
     const datePickerButton = document.querySelector('.date-picker-button');
     const dueDateInput = document.querySelector('#due-date-input');
     if (datePickerButton && dueDateInput) {
         datePickerButton.addEventListener('click', () => {
-            dueDateInput.showPicker(); // Программно открываем календарь
+            dueDateInput.showPicker();
         });
     }
 });
 
 function updateTaskInfo(taskType) {
-    console.log('updateTaskInfo: taskType=', taskType); // Диагностика
+    console.log('updateTaskInfo: taskType=', taskType);
     const taskInfo = document.querySelector('.taskinfo');
     const taskSettings = document.querySelector('.tasksettings__content');
     const taskName = taskType === 'min-max' ? 'α & β отсечение' : 'Пятнашки A*';
