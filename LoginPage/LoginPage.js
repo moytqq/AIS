@@ -48,42 +48,17 @@ async function sendLoginForm(data) {
         Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
         Cookies.set('RefreshToken', result.refreshToken);
         
-        // ПОПЫТАЕМСЯ получить данные пользователя для определения роли
-        try {
-            const userResponse = await fetch(`${apiHost}/Users?getSelf=true`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${result.accessToken}`
-                }
-            });
-            
-            if (userResponse.ok) {
-                const userData = await userResponse.json();
-                const currentUser = userData[0]; // первый пользователь в массиве
-                
-                const fullName = formatShortName([
-                    currentUser.secondName,
-                    currentUser.name,
-                    currentUser.patronymic
-                ]);
-                
-                sessionStorage.setItem('userFullName', fullName);
-                sessionStorage.setItem('isTeacher', currentUser.isAdmin ? 'true' : 'false');
-                
-                // РЕДИРЕКТ В ЗАВИСИМОСТИ ОТ РОЛИ
-                if (currentUser.isAdmin) {
-                    window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
-                } else {
-                    window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
-                }
-            } else {
-                throw new Error('Не удалось получить данные пользователя');
-            }
-        } catch (userError) {
-            console.error('Ошибка получения данных пользователя:', userError);
-            // Если не получилось - используем временный редирект
-            sessionStorage.setItem('userFullName', 'Пользователь');
+        // ВРЕМЕННО: ЖЕСТКО задаем редирект для admin
+        console.log('User logged in:', data.userName);
+        
+        if (data.userName.toLowerCase() === 'admin') {
+            // ADMIN → преподаватель
+            sessionStorage.setItem('userFullName', 'Администратор');
+            sessionStorage.setItem('isTeacher', 'true');
+            window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        } else {
+            // ВСЕ ОСТАЛЬНЫЕ → студент
+            sessionStorage.setItem('userFullName', data.userName);
             sessionStorage.setItem('isTeacher', 'false');
             window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
         }
