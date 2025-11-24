@@ -56,7 +56,7 @@ async function fetchAssignedTasks() {
         }
 
         // Fetch Min-Max tasks
-        const minMaxResponse = await fetch(`${apiHost}/AB/Users/`, {
+        const minMaxResponse = await fetch(`${apiHost}/AB/Users`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ async function fetchAssignedTasks() {
         });
 
         // Fetch A* Fifteen Puzzle tasks
-        const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Users/`, {
+        const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Users`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
