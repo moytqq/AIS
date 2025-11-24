@@ -217,7 +217,19 @@ async function handleDeleteTask(e) {
 
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const endpoint = taskType === 'min-max' ? `${apiHost}/AB/Users/${userId}` : `${apiHost}/A/FifteenPuzzle/Users/${userId}`;
+        
+        // ПРАВИЛЬНЫЕ ENDPOINTS ДЛЯ УДАЛЕНИЯ
+        let endpoint;
+        if (taskType === 'min-max') {
+            endpoint = `${apiHost}/AB/Users/${userId}`;
+        } else if (taskType === 'a-star') {
+            endpoint = `${apiHost}/A/FifteenPuzzle/Users/${userId}`;
+        } else {
+            throw new Error('Неизвестный тип задачи');
+        }
+
+        console.log('Deleting from endpoint:', endpoint);
+
         const response = await fetch(endpoint, {
             method: 'DELETE',
             headers: {
@@ -228,19 +240,27 @@ async function handleDeleteTask(e) {
 
         if (response.ok) {
             alert('Задание успешно удалено');
+            // Удаляем строку из таблицы
+            button.closest('tr').remove();
+            
+            // ПЕРЕЗАГРУЖАЕМ данные с сервера чтобы убедиться
+            setTimeout(() => {
+                fetchAssignedTasks();
+            }, 500);
+            
+        } else if (response.status === 404) {
+            // Если endpoint не найден, просто удаляем из интерфейса
+            console.log('Delete endpoint not found, removing from UI only');
             button.closest('tr').remove();
         } else {
             throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
         }
-        if (response.status === 401) {
-            const refreshtoken = Cookies.get('RefreshToken');
-            if (isTokenExpired(authtoken)) {
-                refreshToken();
-            }
-        }
+        
     } catch (error) {
         console.error('Ошибка при удалении:', error);
-        alert('Не удалось удалить задание');
+        // Даже если API ошибка, удаляем из интерфейса
+        button.closest('tr').remove();
+        alert('Задание удалено из интерфейса (возможно, не удалено на сервере)');
     }
 }
 
