@@ -38,16 +38,32 @@ async function sendLoginForm(data) {
             Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
             Cookies.set('RefreshToken', result.refreshToken);
             
-            // ВРЕМЕННО: пропускаем вызов GetUsers и переходим сразу
-            // TODO: позже исправить бэкенд и вернуть этот код
-            
-            // Используем данные из логина для простого редиректа
-            sessionStorage.setItem('userFullName', 'Пользователь'); // временное значение
-            sessionStorage.setItem('isTeacher', 'false'); // временно для студента
-            
-            // Переходим на страницу студента (или учителя если знаете что пользователь админ)
-            window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
-            
+            const userRes = await fetch(`${apiHost}/Users?getSelf=true`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${result.accessToken}`
+                }
+            });
+
+            if (userRes.status === 200) {
+                const userData = (await userRes.json())[0];
+                const fullName = formatShortName([
+                    userData.secondName,
+                    userData.name,
+                    userData.patronymic
+                ]);
+                sessionStorage.setItem('userFullName', fullName);
+                sessionStorage.setItem('isTeacher', userData.isAdmin ? 'true' : 'false');
+                
+                if (userData.isAdmin) {
+                    window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+                } else {
+                    window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+                }
+            } else {
+                throw new Error('Не удалось получить данные пользователя');
+            }
         } else if (response.status === 401 || response.status === 400) {
             const errorMessage = document.getElementById('error-message');
             errorMessage.textContent = 'Неверный логин или пароль';
