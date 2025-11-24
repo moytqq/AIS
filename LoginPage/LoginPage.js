@@ -27,54 +27,45 @@ document.getElementById('form_login').addEventListener('submit', e => {
 
 async function sendLoginForm(data) {
     try {
+        // Пробуем оба варианта имени поля
+        const payload = {
+            username: data.userName, // пробуем username
+            password: data.password
+        };
+
         const response = await fetch(`${apiHost}/Users/Login`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
-        if (response.status === 200) {
-            Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
-            Cookies.set('RefreshToken', result.refreshToken);
-            
-            const userRes = await fetch(`${apiHost}/Users?getSelf=true`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${result.accessToken}`
-                }
-            });
-
-            if (userRes.status === 200) {
-                const userData = (await userRes.json())[0];
-                const fullName = formatShortName([
-                    userData.secondName,
-                    userData.name,
-                    userData.patronymic
-                ]);
-                sessionStorage.setItem('userFullName', fullName);
-                sessionStorage.setItem('isTeacher', userData.isAdmin ? 'true' : 'false');
-                
-                if (userData.isAdmin) {
-                    window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
-                } else {
-                    window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
-                }
-            } else {
-                throw new Error('Не удалось получить данные пользователя');
-            }
-        } else if (response.status === 401 || response.status === 400) {
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = 'Неверный логин или пароль';
-            errorMessage.style.display = 'block';
-        } else {
-            throw new Error('Ошибка сервера');
+        // Сначала проверим статус и тип контента
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.log('Non-JSON response:', text);
+            throw new Error('Server returned non-JSON response');
+        }
+
+        const result = await response.json();
+        
+        // Успешный логин
+        Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
+        Cookies.set('RefreshToken', result.refreshToken);
+        
+        // Временный редирект
+        sessionStorage.setItem('userFullName', 'Пользователь');
+        sessionStorage.setItem('isTeacher', 'false');
+        window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+        
     } catch (error) {
         console.error('Ошибка авторизации:', error);
         const errorMessage = document.getElementById('error-message');
-        errorMessage.textContent = 'Произошла ошибка при входе';
+        errorMessage.textContent = 'Произошла ошибка при входе: ' + error.message;
         errorMessage.style.display = 'block';
     }
 }
