@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="LoginPage.css"> <!-- Убрал ./ -->
-    <link rel="stylesheet" href="../styles/main.css"> <!-- Добавил ../ -->
+    <link rel="stylesheet" href="LoginPage.css">
+    <link rel="stylesheet" href="../styles/main.css">
     <title>Login</title>
 </head>
 <body>
     <main class="main_wrapper">
         <div class="login-logo">
-            <img class="login-logo__sys-img" src="../img/University_logo.webp" alt="University Logo"> <!-- Добавил ../ -->
+            <img class="login-logo__sys-img" src="../img/University_logo.webp" alt="University Logo">
             <span class="login-logo__sys-name">Система проверки знаний алгоритмов по СИИ</span>
         </div>
         <form id="form_login" class="login-form">
@@ -27,8 +27,8 @@
         </form>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
-    <script src="../scripts/auth.js"></script> <!-- Добавил ../ -->
-    <script src="LoginPage.js"></script> <!-- Оставил как есть -->
-    <script src="../scripts/main.js"></script> <!-- Добавил ../ -->
+    <script src="../scripts/main.js"></script> <!-- ПЕРВЫМ - определяет apiHost -->
+    <script src="../scripts/auth.js"></script>
+    <script src="LoginPage.js"></script> <!-- ПОСЛЕДНИМ - использует apiHost -->
 </body>
 </html>
