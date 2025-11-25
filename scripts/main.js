@@ -1,4 +1,4 @@
-const apiHost = 'https://beliaevartyom.ru/api'
+export const apiHost = 'https://beliaevartyom.ru/api'
 
 export default async function Logout() {
     try {
