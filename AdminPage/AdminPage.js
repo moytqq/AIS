@@ -344,7 +344,7 @@ async function fetchDBData() {
             return;
         }
 
-        const response = await fetch(`${apiHost}/Users/list`, {
+        const response = await fetch(`${apiHost}/Users/List`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -435,7 +435,7 @@ async function deleteRecord(id) {
 async function editRecord(id) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users/${id}`, {
+        const response = await fetch(`${apiHost}/Users/List/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
