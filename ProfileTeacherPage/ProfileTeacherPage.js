@@ -75,7 +75,7 @@ async function fetchAssignedTasks() {
                 if (Array.isArray(minMaxData)) {
                     minMaxData.forEach(item => {
                         tasks.push({
-                            id: item.id || `min-max-${Date.now()}`,
+                            id: item.user.id || `min-max-${Date.now()}`,
                             taskType: 'min-max',
                             userName: item.user ? `${item.user.secondName} ${item.user.name}` : 'Неизвестный',
                             group: item.user?.group || '----------',
@@ -106,7 +106,7 @@ async function fetchAssignedTasks() {
                 if (Array.isArray(aStarData)) {
                     aStarData.forEach(item => {
                         tasks.push({
-                            id: item.id || `a-star-${Date.now()}`,
+                            id: item.user.id || `a-star-${Date.now()}`,
                             taskType: 'a-star', 
                             userName: item.user ? `${item.user.secondName} ${item.user.name}` : 'Неизвестный',
                             group: item.user?.group || '----------',
@@ -122,31 +122,8 @@ async function fetchAssignedTasks() {
 
         console.log('All tasks:', tasks);
 
-        if (tasks.length === 0) {
-            // Если нет реальных заданий, покажем тестовые
-            console.log('No tasks from API, showing sample data');
-            const sampleTasks = [
-                {
-                    id: 'sample-1',
-                    taskType: 'min-max',
-                    userName: 'Иванов Иван',
-                    group: 'Группа 1',
-                    date: new Date(),
-                    isSolved: false
-                },
-                {
-                    id: 'sample-2',
-                    taskType: 'a-star',
-                    userName: 'Петров Петр',
-                    group: 'Группа 2', 
-                    date: new Date(),
-                    isSolved: true
-                }
-            ];
-            populateTasksTable(sampleTasks);
-        } else {
-            populateTasksTable(tasks);
-        }
+
+        populateTasksTable(tasks);
         
     } catch (error) {
         console.error('Ошибка в fetchAssignedTasks:', error);
