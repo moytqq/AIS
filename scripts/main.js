@@ -1,6 +1,6 @@
-export const apiHost = 'https://beliaevartyom.ru/api'
+const apiHost = 'https://beliaevartyom.ru/api'
 
-export default async function Logout() {
+async function Logout() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const response = await fetch(`${apiHost}/Users/Logout`, {

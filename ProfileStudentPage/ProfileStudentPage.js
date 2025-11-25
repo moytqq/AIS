@@ -1,6 +1,3 @@
-import Logout from "../scripts/main";
-import { apiHost } from "../scripts/main";
-
 document.addEventListener('DOMContentLoaded', function() {
     if (!restrictAccess()) return;
 

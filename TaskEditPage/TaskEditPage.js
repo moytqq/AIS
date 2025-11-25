@@ -1,6 +1,3 @@
-import Logout from "../scripts/main";
-import { apiHost } from "../scripts/main";
-
 function joinFullName(data) {
     data.forEach(row => {
         row.name = [row.secondName, row.name, row.patronymic].join(' ');

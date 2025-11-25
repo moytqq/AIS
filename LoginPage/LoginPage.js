@@ -1,5 +1,3 @@
-import { apiHost } from "../scripts/main";
-
 function formatShortName(fullNameParts) {
     const [secondName, name, patronymic] = fullNameParts.filter(Boolean);
     if (secondName && name && patronymic) {
