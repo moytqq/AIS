@@ -144,7 +144,7 @@ async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
 
-        const response = await fetch(`${apiHost}/Users`, {
+        const response = await fetch(`${apiHost}/Users/List`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
