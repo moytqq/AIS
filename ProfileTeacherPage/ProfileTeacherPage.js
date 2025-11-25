@@ -75,7 +75,7 @@ async function fetchAssignedTasks() {
                 if (Array.isArray(minMaxData)) {
                     minMaxData.forEach(item => {
                         tasks.push({
-                            id: item.user.id || `min-max-${Date.now()}`,
+                            userId: item.user.id || `min-max-${Date.now()}`,
                             taskType: 'min-max',
                             userName: item.user ? `${item.user.secondName} ${item.user.name}` : 'Неизвестный',
                             group: item.user?.group || '----------',
@@ -106,7 +106,7 @@ async function fetchAssignedTasks() {
                 if (Array.isArray(aStarData)) {
                     aStarData.forEach(item => {
                         tasks.push({
-                            id: item.user.id || `a-star-${Date.now()}`,
+                            userId: item.user.id || `a-star-${Date.now()}`,
                             taskType: 'a-star', 
                             userName: item.user ? `${item.user.secondName} ${item.user.name}` : 'Неизвестный',
                             group: item.user?.group || '----------',
