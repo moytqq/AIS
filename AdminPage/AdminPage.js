@@ -344,7 +344,7 @@ async function fetchDBData() {
             return;
         }
 
-        const response = await fetch(`${apiHost}/Users`, {
+        const response = await fetch(`${apiHost}/list`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
