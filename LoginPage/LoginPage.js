@@ -44,20 +44,16 @@ async function sendLoginForm(data) {
 
         const result = await response.json();
         
-        // Сохраняем токены
         Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
         Cookies.set('RefreshToken', result.refreshToken);
         
-        // ВРЕМЕННО: ЖЕСТКО задаем редирект для admin
         console.log('User logged in:', data.userName);
         
         if (data.userName.toLowerCase() === 'admin') {
-            // ADMIN → преподаватель
             sessionStorage.setItem('userFullName', 'Администратор');
             sessionStorage.setItem('isTeacher', 'true');
             window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
         } else {
-            // ВСЕ ОСТАЛЬНЫЕ → студент
             sessionStorage.setItem('userFullName', data.userName);
             sessionStorage.setItem('isTeacher', 'false');
             window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";

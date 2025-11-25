@@ -147,7 +147,6 @@ document.getElementById('id_button_admin_save').addEventListener('click', async 
     const userPassword = document.getElementById('id_userPassword').value.trim();
 
     if (from_register_user_styles.display !== 'none') {
-        // Validate required fields
         if (!id_groupId) {
             alert('Пожалуйста, выберите группу');
             return;
@@ -314,7 +313,6 @@ async function deleteGroup(groupId) {
 
 async function fetchDBData() {
     try {
-        // Извлекаем Bearer token из cookie
         const authCookie = Cookies.get('.AspNetCore.Identity.Application');
         console.log('Auth cookie:', authCookie);
         
@@ -328,7 +326,7 @@ async function fetchDBData() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authCookie}`  // ← ИСПОЛЬЗУЕМ token из cookie!
+                'Authorization': `Bearer ${authCookie}`  
             },
         });
         
@@ -337,7 +335,7 @@ async function fetchDBData() {
         if (response.status === 401) {
             console.log('Token expired, trying to refresh...');
             await refreshToken();
-            // Повторяем запрос после обновления токена
+             
             return await fetchDBData();
         }
         

@@ -28,7 +28,6 @@ async function fetchAssignedTasks() {
             throw new Error('Токен авторизации отсутствует');
         }
 
-        // Fetch Min-Max tasks
         const minMaxResponse = await fetch(`${apiHost}/AB/Users/`, {
             method: 'GET',
             headers: {
@@ -37,7 +36,6 @@ async function fetchAssignedTasks() {
             }
         });
 
-        // Fetch A* Fifteen Puzzle tasks
         const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Users/`, {
             method: 'GET',
             headers: {
@@ -65,7 +63,6 @@ async function fetchAssignedTasks() {
             throw new Error('Ответ API не является массивом заданий');
         }
 
-        // Combine tasks with task type information
         const tasksWithUserInfo = [
             ...minMaxTasks.map(assignment => ({
                 ...assignment.task,
@@ -83,7 +80,7 @@ async function fetchAssignedTasks() {
             }))
         ];
 
-        console.log('Преобразованные данные:', tasksWithUserInfo); // Диагностика
+        console.log('Преобразованные данные:', tasksWithUserInfo);  
         populateTasksTable(tasksWithUserInfo);
     } catch (error) {
         console.error('Ошибка в fetchAssignedTasks:', error.message, error.stack);
@@ -109,9 +106,9 @@ function populateTasksTable(tasks) {
         const status = task.isSolved ? 'Выполнено' : 'Выдано';
         const userId = task.userId || 'unknown';
         const taskName = task.taskType === 'min-max' ? 'min-max алгоритм' : 'Пятнашки A*';
-        const buttonId = `edit-button-${task.id || 'unknown'}-${index}`; // Уникальный ID для кнопки
+        const buttonId = `edit-button-${task.id || 'unknown'}-${index}`;  
 
-        console.log('Создание строки таблицы:', { taskId: task.id, userId, taskType: task.taskType, taskName, buttonId }); // Диагностика
+        console.log('Создание строки таблицы:', { taskId: task.id, userId, taskType: task.taskType, taskName, buttonId });  
 
         const viewButton = task.isSolved ? `<button class="button-view" data-task-id="${task.id || 'unknown'}" data-user-id="${userId}" data-task-type="${task.taskType}" title="Посмотреть решение"></button>` : '';
 

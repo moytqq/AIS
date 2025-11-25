@@ -661,7 +661,7 @@ function checkSolution(userSolution, correctSolution, isTrainingMode = false) {
             let correctValue = isRoot ? correctNode.a : correctNode.b;
             
             if (isLeaf) {
-                userValue = userNode.a; // Для листовых узлов используем только a
+                userValue = userNode.a;  
                 correctValue = correctNode.a;
             }
             
