@@ -1,4 +1,5 @@
 import Logout from "../scripts/main";
+import { apiHost } from "../scripts/main";
 
 function joinFullName(data) {
     data.forEach(row => {
