@@ -1,3 +1,5 @@
+import Logout from "../scripts/main";
+
 let taskData;
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -973,25 +975,4 @@ function convertInputValue(value) {
     return isNaN(num) ? null : num;
 }
 
-async function Logout() {
-    const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-
-    const response = await fetch(`${apiHost}/Users/Logout`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${authtoken}`
-        }
-    });
-
-    if (response.status === 200) {
-        sessionStorage.removeItem('userFullName');
-        window.location.href = "/LoginPage/LoginPage.html";
-    }
-    if (response.status === 401) {
-        const refreshtoken = Cookies.get('RefreshToken');
-        if (isTokenExpired(authtoken)) {
-            refreshToken();
-        }
-    }
-}
 

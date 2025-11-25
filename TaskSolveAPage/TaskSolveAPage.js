@@ -1,3 +1,5 @@
+import Logout from "../scripts/main";
+
 document.addEventListener('DOMContentLoaded', async function() {
     if (!restrictAccess()) return;
 
@@ -593,26 +595,6 @@ function displaySolutionFeedback(taskData) {
     }
 }
 
-async function Logout() {
-    const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-    const response = await fetch(`${apiHost}/Users/Logout`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${authtoken}`
-        }
-    });
-
-    if (response.status === 200) {
-        sessionStorage.removeItem('userFullName');
-        window.location.href = "/LoginPage/LoginPage.html";
-    }
-    if (response.status === 401) {
-        const refreshtoken = Cookies.get('RefreshToken');
-        if (isTokenExpired(authtoken)) {
-            refreshToken();
-        }
-    }
-}
 
 function drawLinesOnCanvas() {
     const canvas = document.getElementById('tree-canvas');

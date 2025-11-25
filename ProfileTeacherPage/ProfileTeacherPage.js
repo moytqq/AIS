@@ -1,3 +1,5 @@
+import Logout from "../scripts/main";
+
 document.addEventListener('DOMContentLoaded', () => {
     if (!restrictAccess()) return;
 
@@ -19,33 +21,6 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
     Logout();
 });
 
-async function Logout() {
-    try {
-        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users/Logout`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${authtoken}`
-            }
-        });
-        if (response.status === 200) {
-            sessionStorage.removeItem('userFullName');
-            window.location.href = "/LoginPage/LoginPage.html";
-        } else {
-            console.error('Ошибка выхода:', response.status, response.statusText);
-            alert('Не удалось выйти из системы');
-        }
-        if (response.status === 401) {
-            const refreshtoken = Cookies.get('RefreshToken');
-            if (isTokenExpired(authtoken)) {
-                refreshToken();
-            }
-        }
-    } catch (error) {
-        console.error('Ошибка при выходе:', error);
-        alert('Произошла ошибка при выходе');
-    }
-}
 
 async function fetchAssignedTasks() {
     try {
@@ -57,9 +32,7 @@ async function fetchAssignedTasks() {
 
         const tasks = [];
 
-        // ВРЕМЕННО: используем работающие endpoints вместо Test
         try {
-            // Min-Max tasks - используем /AB/Users вместо /AB/Test
             const minMaxResponse = await fetch(`${apiHost}/AB/Users`, {
                 method: 'GET',
                 headers: {
@@ -90,7 +63,6 @@ async function fetchAssignedTasks() {
         }
 
         try {
-            // A* tasks - используем /A/FifteenPuzzle/Users вместо /A/FifteenPuzzle/Test
             const aStarResponse = await fetch(`${apiHost}/A/FifteenPuzzle/Users`, {
                 method: 'GET',
                 headers: {
@@ -195,7 +167,6 @@ async function handleDeleteTask(e) {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         
-        // ПРАВИЛЬНЫЕ ENDPOINTS ДЛЯ УДАЛЕНИЯ
         let endpoint;
         if (taskType === 'min-max') {
             endpoint = `${apiHost}/AB/Users/${userId}`;
@@ -217,16 +188,13 @@ async function handleDeleteTask(e) {
 
         if (response.ok) {
             alert('Задание успешно удалено');
-            // Удаляем строку из таблицы
             button.closest('tr').remove();
             
-            // ПЕРЕЗАГРУЖАЕМ данные с сервера чтобы убедиться
             setTimeout(() => {
                 fetchAssignedTasks();
             }, 500);
             
         } else if (response.status === 404) {
-            // Если endpoint не найден, просто удаляем из интерфейса
             console.log('Delete endpoint not found, removing from UI only');
             button.closest('tr').remove();
         } else {
@@ -235,7 +203,6 @@ async function handleDeleteTask(e) {
         
     } catch (error) {
         console.error('Ошибка при удалении:', error);
-        // Даже если API ошибка, удаляем из интерфейса
         button.closest('tr').remove();
         alert('Задание удалено из интерфейса (возможно, не удалено на сервере)');
     }
@@ -277,7 +244,7 @@ function handleTaskButtonClick(e) {
     const button = e.currentTarget;
     const taskType = button.textContent.includes('Пятнашки A*') ? 'a-star' : 'min-max';
 
-    console.log('handleTaskButtonClick:', { taskType }); // Диагностика
+    console.log('handleTaskButtonClick:', { taskType });
 
     window.location.href = `/TaskEditPage/TaskEditPage.html?taskType=${taskType}`;
 }

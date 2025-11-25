@@ -1,3 +1,5 @@
+import Logout from "../scripts/main";
+
 document.addEventListener('DOMContentLoaded', function () {
     if (!restrictAccess()) return;
 
@@ -128,26 +130,6 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
     Logout();
 });
 
-async function Logout() {
-    const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-
-    const response = await fetch(`${apiHost}/Users/Logout`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${authtoken}`
-        }
-    });
-    if (response.status === 401) {
-        const refreshtoken = Cookies.get('RefreshToken');
-        if (isTokenExpired(authtoken)) {
-            refreshToken();
-        }
-    }
-    if (response.status === 200) {
-        sessionStorage.removeItem('userFullName');
-        window.location.href = "/LoginPage/LoginPage.html";
-    }
-}
 
 document.getElementById('id_button_generate_login_password').addEventListener('click', e => {
     e.preventDefault();

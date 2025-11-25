@@ -1,3 +1,5 @@
+import Logout from "../scripts/main";
+
 function joinFullName(data) {
     data.forEach(row => {
         row.name = [row.secondName, row.name, row.patronymic].join(' ');
@@ -118,27 +120,6 @@ document.getElementById('profile-tooltip__button-logout').addEventListener('clic
     Logout();
 });
 
-async function Logout() {
-    const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-
-    const response = await fetch(`${apiHost}/Users/Logout`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${authtoken}`
-        }
-    });
-
-    if (response.status === 200) {
-        sessionStorage.removeItem('userFullName');
-        window.location.href = "/LoginPage/LoginPage.html";
-    }
-    if (response.status === 401) {
-        const refreshtoken = Cookies.get('RefreshToken');
-        if (isTokenExpired(authtoken)) {
-            refreshToken();
-        }
-    }
-}
 
 async function fetchDBData() {
     try {
