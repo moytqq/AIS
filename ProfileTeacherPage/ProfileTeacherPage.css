@@ -3,6 +3,7 @@
     color: #000000;
     width: 90vw;
     max-width: var(--wrapper-width, 1440px);
+    min-height: calc(100vh - 170px);
     margin: 12px auto 15px;
     padding-bottom: 45px;
     border-radius: 0 0 20px 20px;
