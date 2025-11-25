@@ -335,7 +335,7 @@ async function deleteGroup(groupId) {
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        const response = await fetch(`${apiHost}/Users?getSelf=true`, {
+        const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
