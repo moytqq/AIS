@@ -32,8 +32,9 @@ async function sendLoginForm(data) {
             password: data.password
         };
 
-        const response = await fetch(`${apiHost}/Users/Login`, {
+        const response = await fetch(`${apiHost}/Users/Login?useCookies=true`, {
             method: 'POST',
+            credentials: "include",
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
         });
