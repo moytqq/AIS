@@ -334,22 +334,40 @@ async function deleteGroup(groupId) {
 
 async function fetchDBData() {
     try {
-        const authtoken = Cookies.get('.AspNetCore.Identity.Application');
+        // Извлекаем Bearer token из cookie
+        const authCookie = Cookies.get('.AspNetCore.Identity.Application');
+        console.log('Auth cookie:', authCookie);
+        
+        if (!authCookie) {
+            console.error('No auth cookie found');
+            window.location.href = "/LoginPage/LoginPage.html";
+            return;
+        }
+
         const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                //Authorization: `Bearer ${authtoken}`
+                'Authorization': `Bearer ${authCookie}`  // ← ИСПОЛЬЗУЕМ token из cookie!
             },
         });
+        
+        console.log('Users response status:', response.status);
+        
         if (response.status === 401) {
-            const refreshtoken = Cookies.get('RefreshToken');
-            if (isTokenExpired(authtoken)) {
-                refreshToken();
-            }
+            console.log('Token expired, trying to refresh...');
+            await refreshToken();
+            // Повторяем запрос после обновления токена
+            return await fetchDBData();
         }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Users data received:', data);
+        
         populateTable(data);
         return data;
     } catch (error) {
