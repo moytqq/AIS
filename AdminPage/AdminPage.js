@@ -335,59 +335,24 @@ async function deleteGroup(groupId) {
 async function fetchDBData() {
     try {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
-        
-        // ИСПОЛЬЗУЕМ РАБОТАЮЩИЙ ENDPOINT
-        const response = await fetch(`${apiHost}/Users?getSelf=false`, {
+        const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${authtoken}`
             },
         });
-        
-        console.log('Users API response status:', response.status);
-        
         if (response.status === 401) {
             const refreshtoken = Cookies.get('RefreshToken');
             if (isTokenExpired(authtoken)) {
                 refreshToken();
             }
         }
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         const data = await response.json();
-        console.log('Users data received:', data);
-        
         populateTable(data);
         return data;
-        
     } catch (error) {
         console.error('Ошибка при получении данных:', error);
-        // ВРЕМЕННО: используем тестовые данные если API не работает
-        console.log('Using sample data due to API error');
-        const sampleData = [
-            {
-                id: '1',
-                name: 'Иванов Иван',
-                secondName: 'Иванов',
-                patronymic: 'Иванович',
-                group: 'Группа 1',
-                groupId: 'group1'
-            },
-            {
-                id: '2',
-                name: 'Петров Петр', 
-                secondName: 'Петров',
-                patronymic: 'Петрович',
-                group: 'Группа 2',
-                groupId: 'group2'
-            }
-        ];
-        populateTable(sampleData);
-        return sampleData;
     }
 }
 
