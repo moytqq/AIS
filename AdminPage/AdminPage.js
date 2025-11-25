@@ -337,9 +337,10 @@ async function fetchDBData() {
         const authtoken = Cookies.get('.AspNetCore.Identity.Application');
         const response = await fetch(`${apiHost}/Users`, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${authtoken}`
+                //Authorization: `Bearer ${authtoken}`
             },
         });
         if (response.status === 401) {
