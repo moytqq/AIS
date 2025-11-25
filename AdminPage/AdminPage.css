@@ -287,7 +287,6 @@ input {
     padding: clamp(5px, 1vw, 10px) clamp(10px, 1.5vw, 15px);
     font-size: clamp(16px, 2vw, 24px);
     vertical-align: middle;
-    display: flex;
     align-items: center;
     gap: 10px;
 }
