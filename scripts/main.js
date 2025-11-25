@@ -1,1 +1,1 @@
-const apiHost = '/api'
+const apiHost = 'https://beliaevartyom.ru/api'
