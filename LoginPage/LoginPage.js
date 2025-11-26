@@ -38,7 +38,7 @@ async function sendLoginForm(data) {
             Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
             Cookies.set('RefreshToken', result.refreshToken);
             
-            const userRes = await fetch(`${apiHost}/Users?getSelf=true`, {
+            const userRes = await fetch(`${apiHost}/Users/List?getSelf=true`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
