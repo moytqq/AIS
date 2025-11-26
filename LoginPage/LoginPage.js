@@ -18,8 +18,8 @@ document.getElementById('form_login').addEventListener('submit', e => {
     errorMessage.textContent = '';
 
     const data = {
-        userName: document.getElementById('id_userLogin').value,
-        password: document.getElementById('id_userPassword').value,
+        userName: trim(document.getElementById('id_userLogin')).value,
+        password: trim(document.getElementById('id_userPassword')).value,
     }
     
     sendLoginForm(data);
