@@ -27,42 +27,54 @@ document.getElementById('form_login').addEventListener('submit', e => {
 
 async function sendLoginForm(data) {
     try {
-        const payload = {
-            username: data.userName,
-            password: data.password
-        };
-
         const response = await fetch(`${apiHost}/Users/Login`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
+            body: JSON.stringify(data)
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const result = await response.json();
-        
-        Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
-        Cookies.set('RefreshToken', result.refreshToken);
-        
-        console.log('User logged in:', data.userName);
-        
-        if (data.userName.toLowerCase() === 'admin') {
-            sessionStorage.setItem('userFullName', 'Администратор');
-            sessionStorage.setItem('isTeacher', 'true');
-            window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+        if (response.status === 200) {
+            Cookies.set('.AspNetCore.Identity.Application', result.accessToken);
+            Cookies.set('RefreshToken', result.refreshToken);
+            
+            const userRes = await fetch(`${apiHost}/Users?getSelf=true`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${result.accessToken}`
+                }
+            });
+
+            if (userRes.status === 200) {
+                const userData = (await userRes.json())[0];
+                const fullName = formatShortName([
+                    userData.secondName,
+                    userData.name,
+                    userData.patronymic
+                ]);
+                sessionStorage.setItem('userFullName', fullName);
+                sessionStorage.setItem('isTeacher', userData.isAdmin ? 'true' : 'false');
+                
+                if (userData.isAdmin) {
+                    window.location.href = "/ProfileTeacherPage/ProfileTeacherPage.html";
+                } else {
+                    window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+                }
+            } else {
+                throw new Error('Не удалось получить данные пользователя');
+            }
+        } else if (response.status === 401 || response.status === 400) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = 'Неверный логин или пароль';
+            errorMessage.style.display = 'block';
         } else {
-            sessionStorage.setItem('userFullName', data.userName);
-            sessionStorage.setItem('isTeacher', 'false');
-            window.location.href = "/ProfileStudentPage/ProfileStudentPage.html";
+            throw new Error('Ошибка сервера');
         }
-        
     } catch (error) {
         console.error('Ошибка авторизации:', error);
         const errorMessage = document.getElementById('error-message');
-        errorMessage.textContent = 'Произошла ошибка при входе: ' + error.message;
+        errorMessage.textContent = 'Произошла ошибка при входе';
         errorMessage.style.display = 'block';
     }
 }
